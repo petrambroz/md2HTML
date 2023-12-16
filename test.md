@@ -1,0 +1,4 @@
+> w
+> ahoj
+
+konec
