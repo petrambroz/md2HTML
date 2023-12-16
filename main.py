@@ -1,7 +1,7 @@
 from src.runner import runner
 from timeit import default_timer
 
-testfile = "test.md"
+testfile = "test3.md"
 
 
 with open(testfile, "r") as f:
