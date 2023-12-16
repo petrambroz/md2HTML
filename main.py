@@ -17,5 +17,5 @@ if __name__ == "__main__":
     file.save_file(data)
 
 stop = default_timer()
-print(stop-start, "sec")
+print((stop-start)*100, "ms")
 print(len_)

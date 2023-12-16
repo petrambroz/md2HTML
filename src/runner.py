@@ -11,10 +11,10 @@ class runner:
         self.text = self.text.splitlines()
         self.syntax_inline = ["*", "*", "_", "_", "~", "`"]
         # self.synatax_block = ["#", "```"]
-        self.indent = 2
-        self.indent1 = self.indent*" " + "* "
-        self.indent2 = 2*self.indent*" " + "* "
-        self.indent3 = 3*self.indent*" " + "* "
+        self.indent = 4
+        self.indent1 = self.indent*" "
+        self.indent2 = 2*self.indent*" "
+        self.indent3 = 3*self.indent*" "
 
     def make_file(self):
         html_boilerplate = '<!DOCTYPE html>\n'\
@@ -168,6 +168,10 @@ class runner:
                         olist1 = []
                     output += con.ul(ulist) + "\n"
                     ulist = []
+                if olist != []:
+                    if olist1 != []:
+                        if olist2 != []:
+                            pass
                 if paragraph != "":
                     output += con.paragraph(paragraph) + "\n"
                     paragraph = ""
@@ -198,29 +202,61 @@ class runner:
                     imglink = imglink[0][1:-1]
                     output += con.img(imgname, imglink) + "\n"
 
-            elif i[:2] == "* ":
+            elif i[:2] == "* " or i[:2] == "- " or i[:2] == "+ ":
+                if ulist3 != []:
+                    temp = con.ul(ulist3)
+                    ulist2.append(temp)
+                    ulist3 = []
+                if ulist2 != []:
+                    temp = con.ul(ulist2)
+                    ulist1.append(temp)
+                    ulist2 = []
                 if ulist1 != []:
                     temp = con.ul(ulist1)
                     ulist.append(temp)
                     ulist1 = []
                 temp = self.parseline(i[2:])
                 ulist.append(temp)
-            elif i[:self.indent+2] == self.indent1 or i[:self.indent+2] == "\t* ":
+
+            elif i[:self.indent+2] == self.indent1 + "* " or i[:self.indent+2] == self.indent1 + "+ " or i[:self.indent+2] == self.indent1 + "- ":
                 """ line is a list ad 1st depth
                 """
+                if ulist3 != []:
+                    temp = con.ul(ulist3)
+                    ulist2.append(temp)
+                    ulist3 = []
                 if ulist2 != []:
                     temp = con.ul(ulist2)
                     ulist1.append(temp)
+                    ulist2 = []
                 temp = self.parseline(i[self.indent+2:])
                 ulist1.append(temp)
-            elif i[:2*self.indent+2] == self.indent2 or i[:2*self.indent+2] == "\t\t* ":
+
+            elif i[:self.indent*2+2] == self.indent2 + "* " or i[:self.indent*2+2] == self.indent2 + "+ " or i[:self.indent*2+2] == self.indent2 + "- ":
+                if ulist3 != []:
+                    temp = con.ul(ulist3)
+                    ulist2.append(temp)
+                    ulist3 = []
                 temp = self.parseline(i[2*self.indent+2:])
                 ulist2.append(temp)
+
+            elif i[:self.indent*3+2] == self.indent3 + "* " or i[:self.indent*3+2] == self.indent3 + "+ " or i[:self.indent*3+2] == self.indent3 + "- ":
+                temp = self.parseline(i[3*self.indent+2:])
+                ulist3.append(temp)
             else:
                 if code:
                     codeblock += i + "\n"
                     continue
                 paragraph += self.parseline(i) + "<br>" + "\n"
+        if ulist3 != []:
+            temp = con.ul(ulist3)
+            ulist2.append(temp)
+        if ulist2 != []:
+            temp = con.ul(ulist2)
+            ulist1.append(temp)
+        if ulist1 != []:
+            temp = con.ul(ulist1)
+            ulist.append(temp)
         if ulist != []:
             output += con.ul(ulist)
         if paragraph != "":
