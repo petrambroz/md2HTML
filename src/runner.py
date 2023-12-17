@@ -3,7 +3,7 @@ import re
 
 
 class runner:
-    def __init__(self, language: str, title: str, filename="input.md"):
+    def __init__(self, language: str, title: str, filename="input.md", indent=4):
         self.language = language
         self.title = title
         with open(filename, 'r') as file:
@@ -11,7 +11,7 @@ class runner:
         self.text = self.text.splitlines()
         self.syntax_inline = ["*", "*", "_", "_", "~", "`"]
         # self.synatax_block = ["#", "```"]
-        self.indent = 2
+        self.indent = indent
         self.indent1 = self.indent*" "
         self.indent2 = 2*self.indent*" "
         self.indent3 = 3*self.indent*" "
@@ -110,6 +110,60 @@ class runner:
         string = self.condese(string)
         return string
 
+    def lists(self, level):
+        if level <= 2:
+            if self.ulist3 != []:
+                temp = con.ul(self.ulist3)
+                if self.ulist2 != []:
+                    self.ulist2.append(temp)
+                elif self.olist2 != []:
+                    self.olist2[-1] += temp
+                self.ulist3 = []
+            elif self.olist3 != []:
+                temp = con.ol(self.olist3)
+                if self.ulist2 != []:
+                    self.ulist2[-1] += "\n" + temp
+                elif self.olist2 != []:
+                    self.olist2.append(temp)
+                self.olist3 = []
+        if level <= 1:
+            if self.ulist2 != []:
+                temp = con.ul(self.ulist2)
+                if self.ulist1 != []:
+                    self.ulist1.append(temp)
+                elif self.olist1 != []:
+                    self.olist1[-1] += temp
+                self.ulist2 = []
+            elif self.olist2 != []:
+                temp = con.ol(self.olist2)
+                if self.ulist1 != []:
+                    self.ulist1[-1] += "\n" + temp
+                elif self.olist1 != []:
+                    self.olist1.append(temp)
+                self.olist2 = []
+        if level <= 0:
+            if self.ulist1 != []:
+                temp = con.ul(self.ulist1)
+                if self.ulist != []:
+                    self.ulist.append(temp)
+                elif self.olist2 != []:
+                    self.olist2[-1] += temp
+                self.ulist1 = []
+            elif self.olist1 != []:
+                temp = con.ol(self.olist1)
+                if self.ulist != []:
+                    self.ulist[-1] += "\n" + temp
+                elif self.olist != []:
+                    self.olist.append(temp)
+                self.olist1 = []
+        if level <= -1:
+            if self.ulist != []:
+                self.output += con.ul(self.ulist) + "\n"
+                self.ulist = []
+            elif self.olist != []:
+                self.output += con.ol(self.olist) + "\n"
+                self.olist = []
+
     def parse_heading(self, string):
         level = 0
         i = "#"
@@ -131,120 +185,35 @@ class runner:
         return con.heading(str(level), string, id)
 
     def run(self):
-        output = ""
+        self.output = ""
         paragraph = ""
         codeblock = ""
         code = False
         blockquote = ""
-        ulist = []
-        ulist1 = []
-        ulist2 = []
-        ulist3 = []
-        olist = []
-        olist1 = []
-        olist2 = []
-        olist3 = []
+        self.ulist = []
+        self.ulist1 = []
+        self.ulist2 = []
+        self.ulist3 = []
+        self.olist = []
+        self.olist1 = []
+        self.olist2 = []
+        self.olist3 = []
 
         for i in self.text:
             if i == "":
-                if ulist != []:
-                    if ulist1 != []:
-                        ulist1.append(con.ul(ulist2))
-                        ulist2 = []
-                    elif olist1 != []:
-                        ulist[-1] += (con.ol(olist1))
-                        olist1 = []
-                    if ulist2 != []:
-                        ulist.append(con.ul(ulist1))
-                        ulist1 = []
-                    elif olist2 != []:
-                        ulist1[-1] += (con.ol(olist2))
-                        olist2 = []
-                    if ulist3 != []:
-                        ulist2.append(con.ul(ulist3))
-                        ulist3 = []
-                    elif olist3 != []:
-                        ulist2[-1] += (con.ol(olist3))
-                        olist3 = []
-                    output += con.ul(ulist) + "\n"
-                    ulist = []
-
-                if olist != []:
-                    if olist1 != []:
-                        olist.append(con.ol(olist1))
-                        olist1 = []
-                    elif ulist1 != []:
-                        olist[-1] += (con.ul(ulist1))
-                        ulist1 = []
-                    if olist2 != []:
-                        olist1.append(con.ol(olist2))
-                        olist2 = []
-                    elif ulist2 != []:
-                        olist1[-1] += (con.ul(ulist2))
-                        ulist2 = []
-                    if olist3 != []:
-                        olist2.append(con.ol(olist3))
-                        olist3 = []
-                    elif ulist3 != []:
-                        olist2[-1] += (con.ol(ulist3))
-                        ulist3 = []
-                    output += con.ol(olist) + "\n"
-                    olist = []
-                """
-                if ulist != []:
-                    if ulist1 != []:
-                        if ulist2 != []:
-                            if ulist3 != []:
-                                ulist2.append(con.ul(ulist3))
-                                ulist3 = []
-                            elif olist3 != []:
-                                ulist2[-1] += (con.ol(olist3))
-                                olist3 = []
-                            ulist1.append(con.ul(ulist2))
-                            ulist2 = []
-                        elif olist2 != []:
-                            ulist1[-1] += (con.ol(olist2))
-                            olist2 = []
-                        ulist.append(con.ul(ulist1))
-                        ulist1 = []
-                    elif olist1 != []:
-                        ulist[-1] += (con.ol(olist1))
-                        olist1 = []
-                    output += con.ul(ulist) + "\n"
-                    ulist = []
-                if olist != []:
-                    if olist1 != []:
-                        if olist2 != []:
-                            if olist3 != []:
-                                olist2.append(con.ol(olist3))
-                                olist3 = []
-                            elif ulist3 != []:
-                                olist2[-1] += (con.ol(ulist3))
-                                ulist3 = []
-                            olist1.append(con.ol(olist2))
-                            olist2 = []
-                        elif ulist2 != []:
-                            olist1[-1] += (con.ul(ulist2))
-                            ulist2 = []
-                        olist.append(con.ol(olist1))
-                        olist1 = []
-                    elif ulist1 != []:
-                        olist[-1] += (con.ul(ulist1))
-                        ulist1 = []
-                    output += con.ol(olist) + "\n"
-                    olist = []"""
+                self.lists(-1)
                 if paragraph != "":
-                    output += con.paragraph(paragraph) + "\n"
+                    self.output += con.paragraph(paragraph) + "\n"
                     paragraph = ""
                 if blockquote != "":
-                    output += con.blockquote(blockquote) + "\n"
+                    self.output += con.blockquote(blockquote) + "\n"
                     blockquote = ""
             elif i[0] == "#":
                 if paragraph != "":
-                    output += con.paragraph(paragraph) + "\n"
-                output += self.parse_heading(i) + "\n"
+                    self.output += con.paragraph(paragraph) + "\n"
+                self.output += self.parse_heading(i) + "\n"
             elif i == "---":
-                output += "<br>\n"
+                self.output += "<br>\n"
             elif i[0:2] == "> ":
                 blockquote += (self.parseline(i[2:])) + "\n"
                 continue
@@ -261,263 +230,57 @@ class runner:
                     imgname = imgname[0][1:-1]
                     imglink = re.search(r"[(].*[)]", i)
                     imglink = imglink[0][1:-1]
-                    output += con.img(imgname, imglink) + "\n"
+                    self.output += con.img(imgname, imglink) + "\n"
 
             elif i[:2] == "* " or i[:2] == "- " or i[:2] == "+ ":
-                if ulist3 != []:
-                    temp = con.ul(ulist3)
-                    ulist2.append(temp)
-                    ulist3 = []
-                elif olist3 != []:
-                    temp = con.ol(olist3)
-                    ulist2[-1]+=(temp)
-                    olist3 = []
-                if ulist2 != []:
-                    temp = con.ul(ulist2)
-                    ulist1.append(temp)
-                    ulist2 = []
-                elif olist2 != []:
-                    temp = con.ol(olist2)
-                    ulist1[-1]+=(temp)
-                    olist2 = []
-                if ulist1 != []:
-                    temp = con.ul(ulist1)
-                    ulist.append(temp)
-                    ulist1 = []
-                elif olist1 != []:
-                    temp = con.ol(olist1)
-                    ulist[-1]+=(temp)
-                    olist1 = []
+                self.lists(0)
                 temp = self.parseline(i[2:])
-                ulist.append(temp)
+                self.ulist.append(temp)
 
             elif i[:self.indent+2] == self.indent1 + "* " or i[:self.indent+2] == self.indent1 + "+ " or i[:self.indent+2] == self.indent1 + "- ":
                 """ line is a list ad 1st depth
                 """
-                if ulist3 != []:
-                    temp = con.ul(ulist3)
-                    ulist2.append(temp)
-                    ulist3 = []
-                elif olist3 != []:
-                    temp = con.ol(olist3)
-                    ulist2[-1]+=(temp)
-                    olist3 = []
-                if ulist2 != []:
-                    temp = con.ul(ulist2)
-                    ulist1.append(temp)
-                    ulist2 = []
-                elif olist2 != []:
-                    temp = con.ol(olist2)
-                    ulist1[-1]+=(temp)
-                    olist2 = []
+                self.lists(1)
                 temp = self.parseline(i[self.indent+2:])
-                ulist1.append(temp)
+                self.ulist1.append(temp)
 
             elif i[:self.indent*2+2] == self.indent2 + "* " or i[:self.indent*2+2] == self.indent2 + "+ " or i[:self.indent*2+2] == self.indent2 + "- ":
-                if ulist3 != []:
-                    temp = con.ul(ulist3)
-                    ulist2.append(temp)
-                    ulist3 = []
-                elif olist3 != []:
-                    temp = con.ol(olist3)
-                    ulist2[-1]+(temp)
-                    olist3 = []
+                # 2nd depth
+                self.lists(2)
                 temp = self.parseline(i[2*self.indent+2:])
-                ulist2.append(temp)
+                self.ulist2.append(temp)
 
             elif i[:self.indent*3+2] == self.indent3 + "* " or i[:self.indent*3+2] == self.indent3 + "+ " or i[:self.indent*3+2] == self.indent3 + "- ":
                 temp = self.parseline(i[3*self.indent+2:])
-                ulist3.append(temp)
+                self.ulist3.append(temp)
 
             elif i[0].isdigit() and i[1:3] == ". ":
-                if olist3 != []:
-                    temp = con.ol(olist3)
-                    olist2.append(temp)
-                    olist3 = []
-                elif ulist3 != []:
-                    temp = con.ul(ulist3)
-                    olist2[-1]+=(temp)
-                    ulist3 = []
-                if olist2 != []:
-                    temp = con.ol(olist2)
-                    olist1.append(temp)
-                    olist2 = []
-                elif ulist2 != []:
-                    temp = con.ul(ulist2)
-                    olist1[-1]+=(temp)
-                    ulist2 = []
-                if olist1 != []:
-                    temp = con.ol(olist1)
-                    olist.append(temp)
-                    olist1 = []
-                elif ulist1 != []:
-                    temp = con.ul(ulist1)
-                    olist[-1]+=(temp)
-                    ulist1 = []
+                self.lists(0)
                 temp = self.parseline(i[3:])
-                olist.append(temp)
+                self.olist.append(temp)
             elif i[self.indent].isdigit() and i[self.indent+1:self.indent+3] == ". ":
-                if olist3 != []:
-                    temp = con.ol(olist3)
-                    olist2.append(temp)
-                    olist3 = []
-                elif ulist3 != []:
-                    temp = con.ul(ulist3)
-                    olist2[-1]+=(temp)
-                    ulist3 = []
-                if olist2 != []:
-                    temp = con.ol(olist2)
-                    olist1.append(temp)
-                    olist2 = []
-                elif ulist2 != []:
-                    temp = con.ul(ulist2)
-                    olist1[-1]+=(temp)
-                    ulist2 = []
+                self.lists(1)
                 temp = self.parseline(i[self.indent+3:])
-                olist1.append(temp)
+                self.olist1.append(temp)
             elif i[self.indent*2].isdigit() and i[self.indent*2+1:self.indent*2+3] == ". ":
-                if olist3 != []:
-                    temp = con.ol(olist3)
-                    olist2.append(temp)
-                    olist3 = []
-                elif ulist3 != []:
-                    temp = con.ul(ulist3)
-                    olist2[-1]+=(temp)
-                    ulist3 = []
+                self.lists(2)
                 temp = self.parseline(i[self.indent*2+3:])
-                olist2.append(temp)
+                self.olist2.append(temp)
             elif i[self.indent*3].isdigit() and i[self.indent*3+1:self.indent*3+3] == ". ":
                 temp = self.parseline(i[self.indent*3+3:])
-                olist3.append(temp)
+                self.olist3.append(temp)
             else:
                 if code:
                     codeblock += i + "\n"
                     continue
                 paragraph += self.parseline(i) + "<br>" + "\n"
 
-        if ulist != []:
-            if ulist1 != []:
-                ulist1.append(con.ul(ulist2))
-                ulist2 = []
-            elif olist1 != []:
-                ulist[-1] += (con.ol(olist1))
-                olist1 = []
-            if ulist2 != []:
-                ulist.append(con.ul(ulist1))
-                ulist1 = []
-            elif olist2 != []:
-                ulist1[-1] += (con.ol(olist2))
-                olist2 = []
-            if ulist3 != []:
-                ulist2.append(con.ul(ulist3))
-                ulist3 = []
-            elif olist3 != []:
-                ulist2[-1] += (con.ol(olist3))
-                olist3 = []
-            output += con.ul(ulist) + "\n"
-            ulist = []
-
-        elif olist != []:
-            if olist1 != []:
-                olist.append(con.ol(olist1))
-                olist1 = []
-            elif ulist1 != []:
-                olist[-1] += (con.ul(ulist1))
-                ulist1 = []
-            if olist2 != []:
-                olist1.append(con.ol(olist2))
-                olist2 = []
-            elif ulist2 != []:
-                olist1[-1] += (con.ul(ulist2))
-                ulist2 = []
-            if olist3 != []:
-                olist2.append(con.ol(olist3))
-                olist3 = []
-            elif ulist3 != []:
-                olist2[-1] += (con.ol(ulist3))
-                ulist3 = []
-            output += con.ol(olist) + "\n"
-            olist = []
-
-        """if ulist != []:
-            if ulist1 != []:
-                if ulist2 != []:
-                    if ulist3 != []:
-                        ulist2.append(con.ul(ulist3))
-                        ulist3 = []
-                    elif olist3 != []:
-                        ulist2[-1] += (con.ol(olist3))
-                        olist3 = []
-                    ulist1.append(con.ul(ulist2))
-                    ulist2 = []
-                elif olist2 != []:
-                    ulist1[-1] += (con.ol(olist2))
-                    olist2 = []
-                ulist.append(con.ul(ulist1))
-                ulist1 = []
-            elif olist1 != []:
-                ulist[-1] += (con.ol(olist1))
-                olist1 = []
-            output += con.ul(ulist) + "\n"
-            ulist = []
-        if olist != []:
-            if olist1 != []:
-                if olist2 != []:
-                    pass
-            output += con.ol(olist)
-            olist = []
-        if olist != []:
-            if olist1 != []:
-                if olist2 != []:
-                    if olist3 != []:
-                        olist2.append(con.ol(olist3))
-                        olist3 = []
-                    elif ulist3 != []:
-                        olist2[-1] += (con.ol(ulist3))
-                        ulist3 = []
-                    olist1.append(con.ol(olist2))
-                    olist2 = []
-                elif ulist2 != []:
-                    olist1[-1] += (con.ul(ulist2))
-                    ulist2 = []
-                olist.append(con.ol(olist1))
-                olist1 = []
-            elif ulist1 != []:
-                olist[-1] += (con.ul(ulist1))
-                ulist1 = []
-            output += con.ol(olist) + "\n"
-            olist = []"""
-
-
-        """
-        if ulist3 != []:
-            temp = con.ul(ulist3)
-            ulist2.append(temp)
-        if ulist2 != []:
-            temp = con.ul(ulist2)
-            ulist1.append(temp)
-        if ulist1 != []:
-            temp = con.ul(ulist1)
-            ulist.append(temp)
-        if ulist != []:
-            output += con.ul(ulist)
-
-        if olist3 != []:
-            temp = con.ol(olist3)
-            olist2.append(temp)
-        if olist2 != []:
-            temp = con.ol(olist2)
-            olist1.append(temp)
-        if olist1 != []:
-            temp = con.ol(olist1)
-            olist.append(temp)
-        if olist != []:
-            output += con.ol(olist)"""
+        self.lists(-1)
         if paragraph != "":
-            output += con.paragraph(paragraph)
+            self.output += con.paragraph(paragraph)
         if blockquote != "":
-            output += con.blockquote(blockquote) + "\n"
-        return output
+            self.output += con.blockquote(blockquote) + "\n"
+        return self.output
 
 
 con = convertor.convertor()
