@@ -9,7 +9,7 @@ class Runner:
         with open(filename, 'r') as file:
             self.text = file.read()
         self.text = self.text.splitlines()
-        self.syntax_inline = ["*", "*", "_", "_", "~", "`"]
+        self.syntax_inline = ["*", "*", "_", "_", "~", "`", "=", "^"]
         self.indent = indent
         self.indent1 = self.indent*" "
         self.indent2 = 2*self.indent*" "
@@ -30,10 +30,7 @@ class Runner:
 
     def save_file(self, data):
         with open("output.html", "a") as f:
-            f.write(data + "\n</body>")
-
-    def _out(self):  # unused
-        print(self.text)
+            f.write(data + "\n</body>" + "\n</html>")
 
     def send_to_edit(self, syntax, string):
         if syntax == "**" or syntax == "__":
@@ -48,6 +45,8 @@ class Runner:
             result = con.subscript(string)
         elif syntax == "==":
             result = con.mark(string)
+        elif syntax == "^":
+            result = con.superscript(string)
         return result
 
     def condese(self, list):
@@ -91,7 +90,8 @@ class Runner:
                     continue
 
             if i in self.syntax_inline and (line[index+1:].count(i) % 2 == 1 or i in syntax):
-                if len(line) != index+1:
+                # check if the symbol has a mathching "closing" symbol
+                if len(line) != index+1:  # if the current symbol is a "double-symbol", eg. "**""
                     if line[index+1] == i and i != syntax[-1]:
                         i += line[index+1]
                         skip = True
@@ -229,7 +229,8 @@ class Runner:
                     code = True
             elif i[0] == "!":
                 x = re.search(r"[!][\[].*[]][(].*[)]", i)
-                if x:
+                # try to find a squence of characters that define an embedded image
+                if x:  # assumes that "re" returns None if nothing found
                     imgname = re.search(r"[\[].*[]]", i)
                     imgname = imgname[0][1:-1]
                     imglink = re.search(r"[(].*[)]", i)
@@ -237,12 +238,13 @@ class Runner:
                     self.output += con.img(imgname, imglink) + "\n"
 
             elif i[:2] == "* " or i[:2] == "- " or i[:2] == "+ ":
+                # unordered list (bullet-point list) at "zero" depth (no indentation)
                 self.lists(0)
                 temp = self.parseline(i[2:])
                 self.ulist.append(temp)
 
             elif i[:self.indent+2] == self.indent1 + "* " or i[:self.indent+2] == self.indent1 + "+ " or i[:self.indent+2] == self.indent1 + "- ":
-                # line is an unordered list at 1st depth
+                # 1st depth
                 self.lists(1)
                 temp = self.parseline(i[self.indent+2:])
                 self.ulist1.append(temp)
@@ -259,19 +261,22 @@ class Runner:
                 self.ulist3.append(temp)
 
             elif i[0].isdigit() and i[1:3] == ". ":
-                # ordered list at 1st depth 
+                # ordered list at "zero" depth (no indentation)
                 self.lists(0)
                 temp = self.parseline(i[3:])
                 self.olist.append(temp)
-            elif i[self.indent].isdigit() and i[self.indent+1:self.indent+3] == ". ":
+            elif len(i) > self.indent and i[self.indent].isdigit() and i[self.indent+1:self.indent+3] == ". ":
+                # 1st depth
                 self.lists(1)
                 temp = self.parseline(i[self.indent+3:])
                 self.olist1.append(temp)
-            elif i[self.indent*2].isdigit() and i[self.indent*2+1:self.indent*2+3] == ". ":
+            elif len(i) > self.indent*2 and i[self.indent*2].isdigit() and i[self.indent*2+1:self.indent*2+3] == ". ":
+                # 2nd depth
                 self.lists(2)
                 temp = self.parseline(i[self.indent*2+3:])
                 self.olist2.append(temp)
-            elif i[self.indent*3].isdigit() and i[self.indent*3+1:self.indent*3+3] == ". ":
+            elif len(i) > self.indent*3 and i[self.indent*3].isdigit() and i[self.indent*3+1:self.indent*3+3] == ". ":
+                # 3rd depth
                 temp = self.parseline(i[self.indent*3+3:])
                 self.olist3.append(temp)
             else:
@@ -280,7 +285,7 @@ class Runner:
                     continue
                 paragraph += self.parseline(i) + "<br>" + "\n"
 
-        self.lists(-1)
+        self.lists(-1)  # process any lists, that weren't processed yet
         if paragraph != "":
             self.output += con.paragraph(paragraph)
         if blockquote != "":
