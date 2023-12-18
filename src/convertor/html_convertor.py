@@ -31,6 +31,10 @@ class Convertor:
         element = f"<code>{string}</code>"
         return element
 
+    def mark(self, string):
+        element = f"<mark>{string}</mark>"
+        return element
+
     def codeblock(self, string):
         element = f"<pre><code>{string}</code></pre>"
         return element

@@ -46,6 +46,8 @@ class Runner:
             result = con.code(string)
         elif syntax == "~":
             result = con.subscript(string)
+        elif syntax == "==":
+            result = con.mark(string)
         return result
 
     def condese(self, list):
@@ -93,6 +95,9 @@ class Runner:
                     if line[index+1] == i and i != syntax[-1]:
                         i += line[index+1]
                         skip = True
+                if i == "=":
+                    string[-1] += i
+                    continue
                 if i in syntax:
                     if i == syntax.pop():
                         s = string.pop()
@@ -237,8 +242,7 @@ class Runner:
                 self.ulist.append(temp)
 
             elif i[:self.indent+2] == self.indent1 + "* " or i[:self.indent+2] == self.indent1 + "+ " or i[:self.indent+2] == self.indent1 + "- ":
-                """ line is a list ad 1st depth
-                """
+                # line is an unordered list at 1st depth
                 self.lists(1)
                 temp = self.parseline(i[self.indent+2:])
                 self.ulist1.append(temp)
@@ -250,10 +254,12 @@ class Runner:
                 self.ulist2.append(temp)
 
             elif i[:self.indent*3+2] == self.indent3 + "* " or i[:self.indent*3+2] == self.indent3 + "+ " or i[:self.indent*3+2] == self.indent3 + "- ":
+                # 3rd depth
                 temp = self.parseline(i[3*self.indent+2:])
                 self.ulist3.append(temp)
 
             elif i[0].isdigit() and i[1:3] == ". ":
+                # ordered list at 1st depth 
                 self.lists(0)
                 temp = self.parseline(i[3:])
                 self.olist.append(temp)
