@@ -1,4 +1,4 @@
-class convertor:
+class Convertor:
     def __init__(self) -> None:
         pass
 

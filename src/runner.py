@@ -1,8 +1,8 @@
-from . import convertor
+from src.convertor import html_convertor
 import re
 
 
-class runner:
+class Runner:
     def __init__(self, language: str, title: str, filename="input.md", indent=4):
         self.language = language
         self.title = title
@@ -10,7 +10,6 @@ class runner:
             self.text = file.read()
         self.text = self.text.splitlines()
         self.syntax_inline = ["*", "*", "_", "_", "~", "`"]
-        # self.synatax_block = ["#", "```"]
         self.indent = indent
         self.indent1 = self.indent*" "
         self.indent2 = 2*self.indent*" "
@@ -283,8 +282,4 @@ class runner:
         return self.output
 
 
-con = convertor.convertor()
-
-if __name__ == "__main__":
-    a = runner("cs", "ahoj")
-    print(a.parseline("ah **j*s*e** máš?"))
+con = html_convertor.Convertor()
