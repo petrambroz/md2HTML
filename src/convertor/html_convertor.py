@@ -27,6 +27,10 @@ class Convertor:
         element = f"<sub>{string}</sub>"
         return element
 
+    def superscript(self, string):
+        element = f"<sup>{string}</sub>"
+        return element
+
     def code(self, string):
         element = f"<code>{string}</code>"
         return element

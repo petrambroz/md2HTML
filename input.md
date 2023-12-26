@@ -1,1 +1,1 @@
-***ahoj***
+`**text**` nebo `__text__`

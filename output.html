@@ -6,38 +6,43 @@
     <title>dokument</title>
 </head>
 <body>
-<h2>Friedrich W. J. von Schelling</h2>
-<ul>
-<li>1775—1854</li>
-<li>Máme 2 světy
+<h1>Zápočtový program – převod MarkDownu do HTML</h1>
+<h2>Úvod</h2>
+<p>Program řeší zdánlivě jednoduchý problém: ze souboru s textem naformátovaným v MarkDownu vytvoří plnohodnotný soubor HTML, který je zobrazitelný webovým prohlížečem.<br></p>
+<h2>Vstup programu</h2>
+<p>Program příjmá jeden soubor <i>nazev_souboru.md</i> a z něj vytvoří sloubor <i>output.html</i>. Název souboru je konfigurovatelný a pokud jde o platný textový soubor, není nutné dodržet příponu .md, nicméně pro přehlednost to je vřele doporučeno.<br></p>
+<p>Jediným požadavkem na vstupní soubor je jeho platné naformátování, jelikož program je poměrně striktní a jakékoliv i drobné "nesrovnalosti" může vyhodnotit špatně. Platným formátováním se rozumí:<br></p>
 <ol>
-<li>Subjektivní — reprezentován duchem a dějinami (postup od subjektu k objektu)</li>
-<li>Objektivní — hmotný svět, příroda (od objektu k subjektu)<ul>
-<li>Nikdy není pouze jedno, vždy je obojí, záleží na poměru a co převažuje</li>
-<li>V prazákladu je obsažena absolutní jednota subjektu a objektu (ducha a přírody)</li>
+<li>Úpravy textu na úrovni řádku (<em>tučné písmo</em>, <i>kurzíva</i>, ...)<ul>
+<li>každý počátek formátovaného úseku musí být ukončen (a to stejným znakem)</li>
 <ul>
-<li><em>Filosofie identity</em></li>
-<li>Ruší se protiklady subjektů a objektů</li>
-<li>Duch je výtvorem přírody</li>
-<li>Abychom pochopili ducha z přírody, musíme uznat, že příroda je nekonečná</li>
-<li>Podstatou přírody je absolutno, neboli živoucí síla</li>
+<li><code>*text*</code> – toto je platné</li>
+<li><code>_text*</code> – toto platné není</li>
+<li><code>*text</code> – toto také není platné</li>
 </ul>
 </ul></li>
-</ol></li>
-<li>we</li>
-</ul>
-<h2>Georg Wilhelm Friedrich Hegel</h2>
+<li>Číslované a nečíslované seznamy<ul>
+<li>v celém MarkDown dokumentu musí být dodržen jednotný styl odsazení (je konfigurovatelný)</li>
 <ul>
-<li>1770–1831</li>
-<li>Žák Schellinga</li>
-<li>Podstatou všeho je duchovní princip</li>
-<li>Co je hmotné, je druhotné</li>
-<li>Hmotné je ztělesněním duchovního principu</li>
-<li><em>Absolutní idealismus</em></li>
-<li>Idea je podstatou každé věci</li>
+<li>odsazení je provedeno pomocí mezer, a to ve stanovených násobcích (doporučuje se používat 2 nebo 4)</li>
+</ul>
+<li>prázdná řádek mezi jednotlivými seznamy vytvoří seznamy oddělené (nový element ol či ul)</li>
+<li>číslované a nečíslované seznamy lze kombinovat, avšak na jedné úrovní smí být pouze jeden druh (nemohou se střídat číslované a nečíslované řádky se stejným odsazením)</li>
+</ul></li>
+<li>Odstavce<ul>
+<li>prázdný řáddek označuje odstavec (nový element <code><p></code>)</li>
+</ul></li>
+<li>Nadpisy<ul>
+<li>je podporováno 6 úrovní napisů – <code># nadpis 1</code>, <code>## nadpis 2</code> atd.</li>
 <ul>
-<li>My ideje chápeme lidským rozumem</li>
+<li>pokud je v souboru nadpis úrovně 7 nebo více, program ohlásí výjimku a nedoběhne</li>
 </ul>
+<li>nadpis muže mít své "id" – <code>## nadpis {#id}</code></li>
+<ul>
+<li>to může být použité např. pro vytvoření odkazu (kotvy) na tento nadpis</li>
+<li>id není zobrazeno, slouží pouze pro odkazování</li>
 </ul>
+</ul></li>
+</ol>
 
 </body>

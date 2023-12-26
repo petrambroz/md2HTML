@@ -90,8 +90,10 @@ class Runner:
                     continue
 
             if i in self.syntax_inline and (line[index+1:].count(i) % 2 == 1 or i in syntax):
-                # check if the symbol has a mathching "closing" symbol
-                if len(line) != index+1:  # if the current symbol is a "double-symbol", eg. "**""
+                if i != "`" and syntax[-1] == "`":
+                    string[-1] += i
+                    continue
+                if len(line) != index+1:
                     if line[index+1] == i and i != syntax[-1]:
                         i += line[index+1]
                         skip = True
@@ -150,8 +152,8 @@ class Runner:
                 temp = con.ul(self.ulist1)
                 if self.ulist != []:
                     self.ulist.append(temp)
-                elif self.olist2 != []:
-                    self.olist2[-1] += temp
+                elif self.olist != []:
+                    self.olist[-1] += temp
                 self.ulist1 = []
             elif self.olist1 != []:
                 temp = con.ol(self.olist1)
@@ -225,6 +227,7 @@ class Runner:
                 if code:
                     code = False
                     paragraph += con.codeblock(codeblock)
+                    codeblock = ""
                 else:
                     code = True
             elif i[0] == "!":
@@ -265,18 +268,15 @@ class Runner:
                 self.lists(0)
                 temp = self.parseline(i[3:])
                 self.olist.append(temp)
-            elif len(i) > self.indent and i[self.indent].isdigit() and i[self.indent+1:self.indent+3] == ". ":
-                # 1st depth
+            elif len(i) >= self.indent and i[self.indent].isdigit() and i[self.indent+1:self.indent+3] == ". ":
                 self.lists(1)
                 temp = self.parseline(i[self.indent+3:])
                 self.olist1.append(temp)
-            elif len(i) > self.indent*2 and i[self.indent*2].isdigit() and i[self.indent*2+1:self.indent*2+3] == ". ":
-                # 2nd depth
+            elif len(i) >= self.indent*2 and i[self.indent*2].isdigit() and i[self.indent*2+1:self.indent*2+3] == ". ":
                 self.lists(2)
                 temp = self.parseline(i[self.indent*2+3:])
                 self.olist2.append(temp)
-            elif len(i) > self.indent*3 and i[self.indent*3].isdigit() and i[self.indent*3+1:self.indent*3+3] == ". ":
-                # 3rd depth
+            elif len(i) >= self.indent*3 and i[self.indent*3].isdigit() and i[self.indent*3+1:self.indent*3+3] == ". ":
                 temp = self.parseline(i[self.indent*3+3:])
                 self.olist3.append(temp)
             else:

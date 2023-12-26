@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     language = settings["language"]
     title = settings["title"]
-    indent = settings["indentation"]
+    indent = int(settings["indentation"])
     filename = settings["file-name"]
     file = runner.Runner(language, title, filename, indent)
     data = file.run()
