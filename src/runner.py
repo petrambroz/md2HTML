@@ -6,7 +6,7 @@ class Runner:
     def __init__(self, language: str, title: str, filename="input.md", indent=4):
         self.language = language
         self.title = title
-        with open(filename, 'r') as file:
+        with open(filename, mode='r', encoding="utf-8") as file:
             self.text = file.read()
         self.text = self.text.splitlines()
         self.syntax_inline = ["*", "*", "_", "_", "~", "`", "=", "^"]
@@ -24,12 +24,12 @@ class Runner:
             f'    <title>{self.title}</title>\n'\
             '</head>\n'\
             '<body>\n'
-        with open("output.html", "w") as f:
+        with open("output.html", mode="w", encoding="utf-8") as f:
             data = html_boilerplate
             f.write(data)
 
     def save_file(self, data):
-        with open("output.html", "a") as f:
+        with open("output.html", mode="a", encoding="utf-8") as f:
             f.write(data + "\n</body>" + "\n</html>")
 
     def send_to_edit(self, syntax, string):
