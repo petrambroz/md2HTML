@@ -178,7 +178,8 @@ class Runner:
             level += 1
             i = string[level]
         if level > 6:
-            raise Exception("MarkDown and HTML only support 6 levels of headings. There was a heading with level 7 or more in your file.")
+            raise Exception("MarkDown and HTML only support 6 levels of headings."
+                            "There was a heading with level 7 or more in your file.")
         if string[level] == " ":
             string = string[level+1:]
         else:
@@ -233,7 +234,7 @@ class Runner:
             elif i[0] == "!":
                 x = re.search(r"[!][\[].*[]][(].*[)]", i)
                 # try to find a squence of characters that define an embedded image
-                if x:  # assumes that "re" returns None if nothing found
+                if x:  # assumes that re.search() returns None if nothing found
                     imgname = re.search(r"[\[].*[]]", i)
                     imgname = imgname[0][1:-1]
                     imglink = re.search(r"[(].*[)]", i)
@@ -246,19 +247,22 @@ class Runner:
                 temp = self.parseline(i[2:])
                 self.ulist.append(temp)
 
-            elif i[:self.indent+2] == self.indent1 + "* " or i[:self.indent+2] == self.indent1 + "+ " or i[:self.indent+2] == self.indent1 + "- ":
+            elif (i[:self.indent+2] == self.indent1 + "* " or i[:self.indent+2]
+                  == self.indent1 + "+ " or i[:self.indent+2] == self.indent1 + "- "):
                 # 1st depth
                 self.lists(1)
                 temp = self.parseline(i[self.indent+2:])
                 self.ulist1.append(temp)
 
-            elif i[:self.indent*2+2] == self.indent2 + "* " or i[:self.indent*2+2] == self.indent2 + "+ " or i[:self.indent*2+2] == self.indent2 + "- ":
+            elif (i[:self.indent*2+2] == self.indent2 + "* " or i[:self.indent*2+2]
+                  == self.indent2 + "+ " or i[:self.indent*2+2] == self.indent2 + "- "):
                 # 2nd depth
                 self.lists(2)
                 temp = self.parseline(i[2*self.indent+2:])
                 self.ulist2.append(temp)
 
-            elif i[:self.indent*3+2] == self.indent3 + "* " or i[:self.indent*3+2] == self.indent3 + "+ " or i[:self.indent*3+2] == self.indent3 + "- ":
+            elif (i[:self.indent*3+2] == self.indent3 + "* " or i[:self.indent*3+2]
+                  == self.indent3 + "+ " or i[:self.indent*3+2] == self.indent3 + "- "):
                 # 3rd depth
                 temp = self.parseline(i[3*self.indent+2:])
                 self.ulist3.append(temp)
@@ -285,7 +289,7 @@ class Runner:
                     continue
                 paragraph += self.parseline(i) + "<br>" + "\n"
 
-        self.lists(-1)  # process any lists, that weren't processed yet
+        self.lists(-1)  # process any lists that weren't processed yet
         if paragraph != "":
             self.output += con.paragraph(paragraph)
         if blockquote != "":
