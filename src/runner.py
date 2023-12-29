@@ -49,7 +49,7 @@ class Runner:
             result = con.superscript(string)
         return result
 
-    def condese(self, list):
+    def condese(self, list: list):
         output = ""
         for i in list:
             output += i
@@ -80,7 +80,7 @@ class Runner:
                 else:
                     temp += i
                 continue
-            elif i == "[":
+            elif i == "[" and syntax[-1] != "`":
                 x = re.search(r"[\[][^\[\]]*[]][(][^\[\])]*[)]", line[index:])
                 """uses regular expression to see if the rest of current line contains a sequence of characters
                 that mark a link. skips it otherwise
@@ -89,14 +89,14 @@ class Runner:
                     link = True
                     continue
 
-            if i in self.syntax_inline and (line[index+1:].count(i) % 2 == 1 or i in syntax):
+            if i in self.syntax_inline and (i in syntax or line[index+1:].count(i) % 2 == 1):
                 if i != "`" and syntax[-1] == "`":
                     string[-1] += i
                     continue
-                if len(line) != index+1:
+                if len(line) != index+1:  # current character is an operator and is followed by the same type (e.g. **)
                     if line[index+1] == i and i != syntax[-1]:
                         i += line[index+1]
-                        skip = True
+                        skip = True  # the following char is not processed
                 if i == "=":
                     string[-1] += i
                     continue
@@ -215,23 +215,23 @@ class Runner:
                 if blockquote != "":
                     self.output += con.blockquote(blockquote) + "\n"
                     blockquote = ""
-            elif i[0] == "#":
+            elif i[0] == "#":  # heading
                 if paragraph != "":
                     self.output += con.paragraph(paragraph) + "\n"
                 self.output += self.parse_heading(i) + "\n"
-            elif i == "---":
+            elif i == "---":  # horizontal separator
                 self.output += "<br>\n"
             elif i[0:2] == "> ":
                 blockquote += (self.parseline(i[2:])) + "\n"
                 continue
-            elif i == "```":
+            elif i == "```":  # codeblock
                 if code:
                     code = False
                     paragraph += con.codeblock(codeblock)
                     codeblock = ""
                 else:
                     code = True
-            elif i[0] == "!":
+            elif i[0] == "!":  # could be image
                 x = re.search(r"[!][\[].*[]][(].*[)]", i)
                 # try to find a squence of characters that define an embedded image
                 if x:  # assumes that re.search() returns None if nothing found
@@ -242,7 +242,7 @@ class Runner:
                     self.output += con.img(imgname, imglink) + "\n"
 
             elif i[:2] == "* " or i[:2] == "- " or i[:2] == "+ ":
-                # unordered list (bullet-point list) at "zero" depth (no indentation)
+                # unordered (bullet-point) list at "zero" depth (no indentation)
                 self.lists(0)
                 temp = self.parseline(i[2:])
                 self.ulist.append(temp)

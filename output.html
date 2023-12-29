@@ -7,10 +7,18 @@
 </head>
 <body>
 <h1>Zápočtový program – převod MarkDownu do HTML</h1>
-<h2>Úvod</h2>
-<p>Program řeší zdánlivě jednoduchý problém: ze souboru s textem naformátovaným v MarkDownu vytvoří plnohodnotný soubor HTML, který je zobrazitelný webovým prohlížečem.<br></p>
-<h2>Vstup programu</h2>
-<p>Program příjmá jeden soubor <i>nazev_souboru.md</i> a z něj vytvoří sloubor <i>output.html</i>. Název souboru je konfigurovatelný a pokud jde o platný textový soubor, není nutné dodržet příponu .md, nicméně pro přehlednost to je vřele doporučeno.<br></p>
+<h2>Obsah</h2>
+<ol>
+<li><a href="#uvod">Úvod</a></li>
+<li><a href="#vstup">Vstup</a></li>
+<li><a href="#programatori">Informace pro programátory</a></li>
+<li><a href="#uzivatele">Informace pro uživatele</a></li>
+<li><a href="#prace">Průběh práce</a></li>
+</ol>
+<h2 id="uvod">Úvod</h2>
+<p>Program řeší následující problém: ze souboru s textem naformátovaným v MarkDownu vytvoří plnohodnotný soubor HTML, který je zobrazitelný webovým prohlížečem.<br></p>
+<h2 id="vstup">Vstup programu</h2>
+<p>Program příjmá jeden soubor <i>nazev_souboru.md</i> a z něj vytvoří sloubor <i>output.html</i>. Název souboru je konfigurovatelný a pokud jde o platný textový soubor, není nutné dodržet příponu .md, nicméně pro přehlednost to je vřele doporučeno. Kódování souboru je vyžadováno utf-8.<br></p>
 <p>Jediným požadavkem na vstupní soubor je jeho platné naformátování, jelikož program je poměrně striktní a jakékoliv i drobné "nesrovnalosti" může vyhodnotit špatně. Platným formátováním se rozumí:<br></p>
 <ol>
 <li>Úpravy textu na úrovni řádku (<em>tučné písmo</em>, <i>kurzíva</i>, ...)<ul>
@@ -22,20 +30,33 @@
 </ul>
 </ul></li>
 <li>Číslované a nečíslované seznamy<ul>
+<li>program podporuje maximálně 4 úrovně odsazení</li>
+<ul>
+<li>tzn. první "neindentovaný" řádek, poté jednou, dvakrát a třikrát "indentovaný"</li>
+</ul>
+<li>další řádek může být odsazený pouze o 1 více než předchozí (jednou odsazený řádek může následovat řádek jednou či dvakrát odsazený, ale ne třikrát)</li>
 <li>v celém MarkDown dokumentu musí být dodržen jednotný styl odsazení (je konfigurovatelný)</li>
 <ul>
 <li>odsazení je provedeno pomocí mezer, a to ve stanovených násobcích (doporučuje se používat 2 nebo 4)</li>
 </ul>
 <li>prázdná řádek mezi jednotlivými seznamy vytvoří seznamy oddělené (nový element ol či ul)</li>
+<ul>
+<li>prázdný řádek musí být i mezi začátkem seznamu a případným předchozím odstavcem či jiným elementem</li>
+</ul>
 <li>číslované a nečíslované seznamy lze kombinovat, avšak na jedné úrovní smí být pouze jeden druh (nemohou se střídat číslované a nečíslované řádky se stejným odsazením)</li>
+<li>nečíslované seznamy lze označit znakem *, + nebo -</li>
+<ul>
+<li>lze tyto možnosti kombinovat, avšak je doporučeno se držet pouze jednoho znaku</li>
+</ul>
+<li>u číslovaných seznamů není brán ohled na to, jakou číslicí je označen, vždy se čísluje 1,2,...,n (vlastnost HTML)</li>
 </ul></li>
 <li>Odstavce<ul>
-<li>prázdný řáddek označuje odstavec (nový element <code><p></code>)</li>
+<li>prázdný řáddek označuje odstavec</li>
 </ul></li>
 <li>Nadpisy<ul>
 <li>je podporováno 6 úrovní napisů – <code># nadpis 1</code>, <code>## nadpis 2</code> atd.</li>
 <ul>
-<li>pokud je v souboru nadpis úrovně 7 nebo více, program ohlásí výjimku a nedoběhne</li>
+<li>pokud je v souboru nadpis úrovně 7 nebo více, program ohlásí výjimku a ukončí se</li>
 </ul>
 <li>nadpis muže mít své "id" – <code>## nadpis {#id}</code></li>
 <ul>
@@ -43,6 +64,66 @@
 <li>id není zobrazeno, slouží pouze pro odkazování</li>
 </ul>
 </ul></li>
+<li>Odkazy<ul>
+<li>odkaz je ve formátu <code>[název odkazu](odkaz)</code>, kdy odkaz může být jak relativní, tak absolutní</li>
+<li>je možné se odkazovat na atribut "id" některého z nadpisů</li>
+</ul></li>
+<li>Obrázky<ul>
+<li>obrázek je ve formátu <code>![název obrázku](odkaz)</code>, odkaz je relativní či absolutní.</li>
+<li>obrázek lze vložit pouze na nový řádek (tedy ne doprostřed textu)</li>
+<li>název obrázku je v HTML uložen jako atribut "alt"</li>
+</ul></li>
 </ol>
-
+<h2 id="programatori">Informace pro programátory</h2>
+<h3>Rozdělení do modulů</h3>
+<p>Program je vhodně rozdělen do tří hlavních souborů. V kořenovém adresáři se nachází soubor <code>main.py</code>, který slouží ke spuštění celého programu. Ten načte nastavení ze souboru <code>settings.json</code> a předá je jako parametry k vytvoření objektu třídy <code>Runner</code>. Poté je volána funkce <code>run()</code>, funkcí <code>make_file()</code> je vytvořen nový prázdný soubor a <code>save_file()</code> uloží zpracovaná data.<br></p>
+<h3>Postup zpracování souboru</h3>
+<p>Po spuštění programu main.py je nejprve načteno nastavení ze souboru settings.json, které je předáno konstruktoru třídy Runner při vytváření nové instance. Do proměnné <code>data</code> je funkcí <code>run()</code> z objektu třídy Runner je uložen naformátovaný text v HTML, poté je metodou <code>make_file()</code> do souboru output.html uložena hlavička (či je vytvořen soubor nový) a metodou <code>save_file()</code> je do tohoto souboru uložen text z proměnné data. Tím běh celého programu končí.<br></p>
+<h4>Modrul runner.py</h4>
+<p>Tento soubor, který je obsažen v modulu <code>src</code> obsahuje hlavní část programu. V jeho konstruktoru je načten text z MarkDown souboru, jsou uloženy proměnné později použité k nastavení jazyka, názvu dokumentu (html tag "title"), počet mezer označující odsazený blok.<br></p>
+<h5>Funkce <code>run()</code></h5>
+<p>Hlavní částí je funkce <code>run()</code>, která postupně prochází načtený soubor řádek po řádku a každý řádek zpracuje.<br></p>
+<p>Prvně se testuje, zda je aktuální řádek prázdný – pak jsou "ukončeny" veškeré předchozí rozpracované bloky formátování (seznamy, odstavec, citace), jsou náležtě zprácovány funcí třídy <code>Convertor</code> a přidány k výstupu.<br></p>
+<p>Dále se testuje, zda je na řádku horizontální separátor. Poté zda řádek označuje začátek či konec bloku kódu.<br></p>
+<p>Řádek 229 zkouší, zda řádek začíná vykřičníkem a pokud ano, je pomocí regulárního výrazu zjištěno, zda zbytek řádku odpovídá syntaxi vložení obrázku. Pokud ano, je opět regulárním výrazem z řádku načten zvlášť název a odkaz na obrázek, což je potom předáno funkci třídy <code>Convertor</code> a přidáno k výstupu.<br></p>
+<p>Řádky 238-274 zkouší, zda je aktuální řádek nějaký seznam a podle jeho úrovně je přidán do patřičné proměnné. Ještě předtím je však pomocí metody <code>lists()</code> provedeno zpracování všech předchozích, ještě neukončených částí seznamu.<br></p>
+<p>Pokud se řádek nevyznačuje ničím speciálním, je přidán k aktuálnímu odstavci.<br></p>
+<h5>Funce <code>parse_heading()</code></h5>
+<p>Funkce slouží k naformátovnání nadpisu. Spočítá si, jaké je nadpis úrovně a zbytek stringu předá funkci <code>heading()</code> ze třídy <i>Convertor</i>.<br>
+Také je regulárním výrazem zjištěno, zda nadpis obsahuje <i>id</i> a pokud ano, je předáno funkci <code>heading()</code> zvlášť.<br></p>
+<h5>Funkce <code>lists()</code></h5>
+<p>Jde o pomocnou funkci, která postupně zpracuje seznamy vyšší úrovně, pokud nějaké existují.<br></p>
+<h5>Funkce <code>parseline()</code></h5>
+<p>*pozn.: slovem "operátor" je myšlen některý ze znaků, který na úrovni řádků, např. "<code>**</code>"<br>
+Funkce zpracovává jeden řádek ze souboru. Prochází ho znak po znaku (for cyklem) a vyhodnocuje, jak bude se znakem naloženo. Seznam operátorů je uložen v členské proměnné <code>syntax_inline</code>.<br></p>
+<p>Pokud je daný znak operátor, je přidán na konec datové struktury zásobník, pokud v ní ještě takový operátor není. Pokud je, porovná se s posledním prvkem zásobníku a pokud se shodují, je textový řetězec ohraničený těmito operátory předán na další zpracování. Pokud se neshodují, jsou oba tyto operátory zahozeny, jelikož jde o chybu ve formátovní MarkDownu. Tomuto problému se však snaží předejít podmínka na řádku $92, kdy je otestováno, zda (pokud aktuálně načtený operátor ještě nebyl použit) k aktuálnímu operátoru existuje "párový" operátor, který jeho platnost ukončuje. Pokud tomu tak není, je operátor vyhodnocen jako klasický znak. Pokud tedy na řádku bude výraz např. 2*3, je zobrazen správně. Potom je však vhodné používat znaky "<code>_</code>" pro případné formátování, jelikož by mohlo docházet k chybám při určování, co má přesně který operátor ohraničovat.<br></p>
+<h5>Funkce <code>send_to_edit()</code></h5>
+<p>Funkce volá podle druhu operátoru, který jí byl předán některou z funkcí třídy Convertor, která vrací příslušně naformátovaný text v HTML.<br></p>
+<h5>Metody <code>make_file()</code> a <code>save_file()</code></h5>
+<p>První z těchto metod uloží do prázdného souboru output.html hlavičku html souboru s doplněnými atributy jako je jazyk a title.<br></p>
+<p>Druhá metoda ukládá do již vytvořeného souboru již zpracovaný text naformátovaný do html, ke kterému přidá uzavření tagů body a html.<br></p>
+<h4 id="html_convertor">Modul html_convertor</h4>
+<p>Obsahuje jediný soubor s třídou Convertor, která obsahuje triviální funkce vracející naformátovaný text v html.<br></p>
+<h2 id="uzivatele">Informace pro uživatele</h2>
+<p>Do kořenového adresáře programu (tam, kde je soubor main.py) vložte textový soubor ve formátu MarkDown, který chcete přeložit do HTML. Název souboru by měl být "input.md" (výchozí nastavení), avšak to lze změnit pomocí nastavení. Program se spustí pomocí hlavního skriptu main.py (ideálně pomocí terminálu či ve vámi preferovaném IDE). Výstup bude uložen do souboru output.html. Po zobrazení kladného hlášení je soubor připraven k použití.<br>
+<em>Pozor:</em> je důležité, aby byl soubor v MarkDownu platně naformátovaný, viz <a href="#vstup">vstup programu</a>.<br></p>
+<h3>Nastavení</h3>
+<p>Program nabízí možnost nastavení některých parametrů, které mohou uživateli usnadnit práci. Nastavení se nachází v souboru settings.json, který lze upravit běžným textovým editorem. Měnit můžete pouze hodnoty za dvojtečkou, mezi uvozovkami.<br></p>
+<ol>
+<li>"language" = jazyk – uložený v html souboru jako parametr "lang", určuje jazyk dokumentu kvůli správné interpretaci prohlížečem<ul>
+<li>výchozí hodnota (čeština): "cs"</li>
+</ul></li>
+<li>"title" = název dokumentu, je poté zobrazen v prohlížeči jako název panelu<ul>
+<li>výchozí hodnota: "dokument"</li>
+</ul></li>
+<li>"indentation" =  počet mezer, které určují odsazený úsek textu (důležité u seznamů)<ul>
+<li>výchozí hodnota: "4"</li>
+</ul></li>
+<li>"file-name" =  název vstupního souboru, lze nastavit na libovolný textový řetězec, <em>musí</em> se však shodovat s názvem vstupního souboru (včetně přípony)<ul>
+<li>výchozí hodnota: "input.md"</li>
+</ul></li>
+</ol>
+<h2 id="prace">Průběh práce</h2>
+<p>Nejprve jsem začal tím nejjednoduším – modulem html_convertor, viz <a href="#html_convertor">html_convertor</a>. Již ze začátku jsem chtěl mít funkce, které pouze přijímají string a vrací patřičně naformátovaný text v HTML (a vůbec neřeší, co je ve stringu obsaženo), mít oddělené od zbytku programu. Věděl jsem, že procházení celého souboru řádek po řádku a každý řádek znak po znaku bude samo o sobě místy dost nepřehledné, jelikož půjde o spoustu vnořených "ifů" zkoušejících, zda aktuální znak náhodou neznačí začátek nějakého formátovaného úseku. Toto oddělení od zbytku programu také považuji za výhodné proto, že lze třídu Convertor snadno vyjmout a použít bez výrazných změn v takřka jakémkoli jiném programu, který převádí jiný druh formátování do HTML.<br></p>
 </body>
+</html>

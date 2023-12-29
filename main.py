@@ -13,3 +13,4 @@ if __name__ == "__main__":
     data = file.run()
     file.make_file()
     file.save_file(data)
+    print("Hotovo, uložen soubor output.html.")
