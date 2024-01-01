@@ -56,7 +56,7 @@ Program je vhodně rozdělen do tří hlavních souborů. V kořenovém adresá�
 ### Postup zpracování souboru
 Po spuštění programu main.py je nejprve načteno nastavení ze souboru settings.json, které je předáno konstruktoru třídy Runner při vytváření nové instance. Do proměnné `data` je funkcí `run()` z objektu třídy Runner je uložen naformátovaný text v HTML, poté je metodou `make_file()` do souboru output.html uložena hlavička (či je vytvořen soubor nový) a metodou `save_file()` je do tohoto souboru uložen text z proměnné data. Tím běh celého programu končí.
 
-#### Modrul runner.py
+#### Modul runner.py
 Tento soubor, který je obsažen v modulu `src` obsahuje hlavní část programu. V jeho konstruktoru je načten text z MarkDown souboru, jsou uloženy proměnné později použité k nastavení jazyka, názvu dokumentu (html tag "title"), počet mezer označující odsazený blok.
 
 ##### Funkce `run()`
@@ -66,24 +66,25 @@ Prvně se testuje, zda je aktuální řádek prázdný – pak jsou "ukončeny" 
 
 Dále se testuje, zda je na řádku horizontální separátor. Poté zda řádek označuje začátek či konec bloku kódu.
 
-Řádek $229 zkouší, zda řádek začíná vykřičníkem a pokud ano, je pomocí regulárního výrazu zjištěno, zda zbytek řádku odpovídá syntaxi vložení obrázku. Pokud ano, je opět regulárním výrazem z řádku načten zvlášť název a odkaz na obrázek, což je potom předáno funkci třídy `Convertor` a přidáno k výstupu.
+Řádek $234 zkouší, zda řádek začíná vykřičníkem a pokud ano, je pomocí regulárního výrazu zjištěno, zda zbytek řádku odpovídá syntaxi vložení obrázku. Pokud ano, je opět regulárním výrazem z řádku načten zvlášť název a odkaz na obrázek, což je potom předáno funkci třídy `Convertor` a přidáno k výstupu.
 
-Řádky $238-274 zkouší, zda je aktuální řádek nějaký seznam a podle jeho úrovně je přidán do patřičné proměnné. Ještě předtím je však pomocí metody `lists()` provedeno zpracování všech předchozích, ještě neukončených částí seznamu.
+Řádky $244-285 zkouší, zda je aktuální řádek nějaký seznam a podle jeho úrovně je přidán do patřičné proměnné. Ještě předtím je však pomocí metody `lists()` provedeno zpracování všech předchozích, ještě neukončených částí seznamu.
 
 Pokud se řádek nevyznačuje ničím speciálním, je přidán k aktuálnímu odstavci.
 
 ##### Funce `parse_heading()`
-Funkce slouží k naformátovnání nadpisu. Spočítá si, jaké je nadpis úrovně a zbytek stringu předá funkci `heading()` ze třídy *Convertor*.
+Funkce slouží k naformátovnání nadpisu. Spočítá si, jaké je nadpis úrovně a zbytek stringu (bez znaků #) předá funkci `heading()` ze třídy *Convertor*.
 Také je regulárním výrazem zjištěno, zda nadpis obsahuje *id* a pokud ano, je předáno funkci `heading()` zvlášť.
 
 ##### Funkce `lists()`
-Jde o pomocnou funkci, která postupně zpracuje seznamy vyšší úrovně, pokud nějaké existují.
+Jde o pomocnou funkci, která postupně zpracuje seznamy vyšší úrovně, pokud nějaké existují. Jako argument přijímá úroveň seznamu, od které se mají případné seznamy zpracovat. Např. parametr s hodnotu 1 znamená, že budou zpracovány pouze seznamy s indentací "2" a vyšší, jelikož bude následovat seznam s indentací "1". Hodnota -1 pak znamená, že se má zpracovat vše.
 
 ##### Funkce `parseline()`
-*pozn.: slovem "operátor" je myšlen některý ze znaků, který na úrovni řádků, např. "`**`"
-Funkce zpracovává jeden řádek ze souboru. Prochází ho znak po znaku (for cyklem) a vyhodnocuje, jak bude se znakem naloženo. Seznam operátorů je uložen v členské proměnné `syntax_inline`.
+*pozn.: slovem "operátor" je myšlen některý ze znaků, který nastavuje formátování na úrovni řádků, např. "`**`"
 
-Pokud je daný znak operátor, je přidán na konec datové struktury zásobník, pokud v ní ještě takový operátor není. Pokud je, porovná se s posledním prvkem zásobníku a pokud se shodují, je textový řetězec ohraničený těmito operátory předán na další zpracování. Pokud se neshodují, jsou oba tyto operátory zahozeny, jelikož jde o chybu ve formátovní MarkDownu. Tomuto problému se však snaží předejít podmínka na řádku $92, kdy je otestováno, zda (pokud aktuálně načtený operátor ještě nebyl použit) k aktuálnímu operátoru existuje "párový" operátor, který jeho platnost ukončuje. Pokud tomu tak není, je operátor vyhodnocen jako klasický znak. Pokud tedy na řádku bude výraz např. 2*3, je zobrazen správně. Potom je však vhodné používat znaky "`_`" pro případné formátování, jelikož by mohlo docházet k chybám při určování, co má přesně který operátor ohraničovat.
+Funkce zpracovává jeden řádek ze souboru. Prochází ho znak po znaku (for cyklem) a vyhodnocuje, jak bude se znakem naloženo. Seznam operátorů je uložen v členské proměnné `syntax_inline` typu pole.
+
+Pokud je daný znak operátor, je přidán na konec datové struktury zásobník, pokud v ní ještě takový operátor není. Pokud je, porovná se s posledním prvkem zásobníku a pokud se shodují, je textový řetězec ohraničený těmito operátory předán k dalšímu zpracování. Pokud se neshodují, jsou oba tyto operátory zahozeny, jelikož jde o chybu ve formátovní MarkDownu. Tomuto problému se však snaží předejít podmínka na řádku $92, kdy je otestováno, zda (pokud aktuálně načtený operátor ještě nebyl použit) k aktuálnímu operátoru existuje "párový" operátor, který jeho platnost ukončuje. Pokud tomu tak není, je operátor vyhodnocen jako klasický znak. Pokud tedy na řádku bude výraz např. 2*3, je zobrazen správně. Potom je však vhodné používat znaky "`_`" pro případné formátování, jelikož by mohlo docházet k chybám při určování, co má přesně který operátor ohraničovat.
 
 ##### Funkce `send_to_edit()`
 Funkce volá podle druhu operátoru, který jí byl předán některou z funkcí třídy Convertor, která vrací příslušně naformátovaný text v HTML.
@@ -98,7 +99,7 @@ Obsahuje jediný soubor s třídou Convertor, která obsahuje triviální funkce
 
 ## Informace pro uživatele {#uzivatele}
 Do kořenového adresáře programu (tam, kde je soubor main.py) vložte textový soubor ve formátu MarkDown, který chcete přeložit do HTML. Název souboru by měl být "input.md" (výchozí nastavení), avšak to lze změnit pomocí nastavení. Program se spustí pomocí hlavního skriptu main.py (ideálně pomocí terminálu či ve vámi preferovaném IDE). Výstup bude uložen do souboru output.html. Po zobrazení kladného hlášení je soubor připraven k použití.
-**Pozor:** je důležité, aby byl soubor v MarkDownu platně naformátovaný, viz [vstup programu](#vstup).
+**Pozor:** je důležité, aby byl vstupní soubor v MarkDownu platně naformátovaný, viz [vstup programu](#vstup).
 
 ### Nastavení
 Program nabízí možnost nastavení některých parametrů, které mohou uživateli usnadnit práci. Nastavení se nachází v souboru settings.json, který lze upravit běžným textovým editorem. Měnit můžete pouze hodnoty za dvojtečkou, mezi uvozovkami.
@@ -114,3 +115,5 @@ Program nabízí možnost nastavení některých parametrů, které mohou uživa
 
 ## Průběh práce {#prace}
 Nejprve jsem začal tím nejjednoduším – modulem html_convertor, viz [html_convertor](#html_convertor). Již ze začátku jsem chtěl mít funkce, které pouze přijímají string a vrací patřičně naformátovaný text v HTML (a vůbec neřeší, co je ve stringu obsaženo), mít oddělené od zbytku programu. Věděl jsem, že procházení celého souboru řádek po řádku a každý řádek znak po znaku bude samo o sobě místy dost nepřehledné, jelikož půjde o spoustu vnořených "ifů" zkoušejících, zda aktuální znak náhodou neznačí začátek nějakého formátovaného úseku. Toto oddělení od zbytku programu také považuji za výhodné proto, že lze třídu Convertor snadno vyjmout a použít bez výrazných změn v takřka jakémkoli jiném programu, který převádí jiný druh formátování do HTML.
+
+Druhým krokem pak bylo napsat program, který bude procházet text a hledat v něm znaky nastavující formátování. Zde bylo důležité určit, které bude program rozeznávat, jelikož MarkDown kromě běžné syntaxe může podporovat některé složitější struktury, jako např. tabulky a poznámky pod čarou, které jsem se rozhodl neimplementovat kvůli jejich složitosti a ne zcela snadnému použití v HTML. Naopak jsem chtěl implementovat věci jako horní a dolní idex, id nadpisů a víceřádkový codeblock. Pro inspiraci a ověření platnosti syntaxe jsem využíval webovou stránku [markdownguide.org](https://www.markdownguide.org).

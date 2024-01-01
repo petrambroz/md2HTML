@@ -83,7 +83,7 @@ class Runner:
             elif i == "[" and syntax[-1] != "`":
                 x = re.search(r"[\[][^\[\]]*[]][(][^\[\])]*[)]", line[index:])
                 """uses regular expression to see if the rest of current line contains a sequence of characters
-                that mark a link. skips it otherwise
+                that mark a link. is processed as regular text otherwise
                 """
                 if x and x.start() == 0:
                     link = True
@@ -231,7 +231,7 @@ class Runner:
                     codeblock = ""
                 else:
                     code = True
-            elif i[0] == "!":  # could be image
+            elif i[0] == "!":  # could be an image
                 x = re.search(r"[!][\[].*[]][(].*[)]", i)
                 # try to find a squence of characters that define an embedded image
                 if x:  # assumes that re.search() returns None if nothing found
