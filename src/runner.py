@@ -6,9 +6,7 @@ class Runner:
     def __init__(self, language: str, title: str, filename="input.md", indent=4):
         self.language = language
         self.title = title
-        with open(filename, mode='r', encoding="utf-8") as file:
-            self.text = file.read()
-        self.text = self.text.splitlines()
+        self.filename = filename
         self.syntax_inline = ["*", "*", "_", "_", "~", "`", "=", "^"]
         self.indent = indent
         self.indent1 = self.indent*" "
@@ -66,6 +64,8 @@ class Runner:
         for index, i in enumerate(line):
             if skip:
                 skip = False
+                continue
+            if i == "\\":
                 continue
             if link:
                 if i == "]":
@@ -205,95 +205,96 @@ class Runner:
         self.olist1 = []
         self.olist2 = []
         self.olist3 = []
-
-        for i in self.text:
-            if i == "":
-                self.lists(-1)
-                if paragraph != "":
-                    self.output += con.paragraph(paragraph) + "\n"
-                    paragraph = ""
-                if blockquote != "":
-                    self.output += con.blockquote(blockquote) + "\n"
-                    blockquote = ""
-            elif i[0] == "#":  # heading
-                if paragraph != "":
-                    self.output += con.paragraph(paragraph) + "\n"
-                self.output += self.parse_heading(i) + "\n"
-            elif i == "---":  # horizontal separator
-                self.output += "<br>\n"
-            elif i[0:2] == "> ":
-                blockquote += (self.parseline(i[2:])) + "\n"
-                continue
-            elif i == "```":  # codeblock
-                if code:
-                    code = False
-                    paragraph += con.codeblock(codeblock)
-                    codeblock = ""
-                else:
-                    code = True
-            elif i[0] == "!":  # could be an image
-                x = re.search(r"[!][\[].*[]][(].*[)]", i)
-                # try to find a squence of characters that define an embedded image
-                if x:  # assumes that re.search() returns None if nothing found
-                    imgname = re.search(r"[\[].*[]]", i)
-                    imgname = imgname[0][1:-1]
-                    imglink = re.search(r"[(].*[)]", i)
-                    imglink = imglink[0][1:-1]
-                    self.output += con.img(imgname, imglink) + "\n"
-
-            elif i[:2] == "* " or i[:2] == "- " or i[:2] == "+ ":
-                # unordered (bullet-point) list at "zero" depth (no indentation)
-                self.lists(0)
-                temp = self.parseline(i[2:])
-                self.ulist.append(temp)
-
-            elif (i[:self.indent+2] == self.indent1 + "* " or i[:self.indent+2]
-                  == self.indent1 + "+ " or i[:self.indent+2] == self.indent1 + "- "):
-                # 1st depth
-                self.lists(1)
-                temp = self.parseline(i[self.indent+2:])
-                self.ulist1.append(temp)
-
-            elif (i[:self.indent*2+2] == self.indent2 + "* " or i[:self.indent*2+2]
-                  == self.indent2 + "+ " or i[:self.indent*2+2] == self.indent2 + "- "):
-                # 2nd depth
-                self.lists(2)
-                temp = self.parseline(i[2*self.indent+2:])
-                self.ulist2.append(temp)
-
-            elif (i[:self.indent*3+2] == self.indent3 + "* " or i[:self.indent*3+2]
-                  == self.indent3 + "+ " or i[:self.indent*3+2] == self.indent3 + "- "):
-                # 3rd depth
-                temp = self.parseline(i[3*self.indent+2:])
-                self.ulist3.append(temp)
-
-            elif i[0].isdigit() and i[1:3] == ". ":
-                # ordered list at "zero" depth (no indentation)
-                self.lists(0)
-                temp = self.parseline(i[3:])
-                self.olist.append(temp)
-            elif len(i) >= self.indent and i[self.indent].isdigit() and i[self.indent+1:self.indent+3] == ". ":
-                self.lists(1)
-                temp = self.parseline(i[self.indent+3:])
-                self.olist1.append(temp)
-            elif len(i) >= self.indent*2 and i[self.indent*2].isdigit() and i[self.indent*2+1:self.indent*2+3] == ". ":
-                self.lists(2)
-                temp = self.parseline(i[self.indent*2+3:])
-                self.olist2.append(temp)
-            elif len(i) >= self.indent*3 and i[self.indent*3].isdigit() and i[self.indent*3+1:self.indent*3+3] == ". ":
-                temp = self.parseline(i[self.indent*3+3:])
-                self.olist3.append(temp)
-            else:
-                if code:
+        with open(self.filename, mode='r', encoding="utf-8") as file:
+            for i in file:
+                i = i.rstrip()
+                if i == "":
+                    self.lists(-1)
+                    if paragraph != "":
+                        self.output += con.paragraph(paragraph) + "\n"
+                        paragraph = ""
+                    if blockquote != "":
+                        self.output += con.blockquote(blockquote) + "\n"
+                        blockquote = ""
+                elif i[0] == "#":  # heading
+                    if paragraph != "":
+                        self.output += con.paragraph(paragraph) + "\n"
+                    self.output += self.parse_heading(i) + "\n"
+                elif i == "---":  # horizontal separator
+                    self.output += "<br>\n"
+                elif i[0:2] == "> ":
+                    blockquote += (self.parseline(i[2:])) + "\n"
+                    continue
+                elif i == "```":  # codeblock
+                    if code:
+                        code = False
+                        paragraph += con.codeblock(codeblock)
+                        codeblock = ""
+                    else:
+                        code = True
+                elif code:
                     codeblock += i + "\n"
                     continue
-                paragraph += self.parseline(i) + "<br>" + "\n"
+                elif i[0] == "!":  # could be an image
+                    x = re.search(r"[!][\[].*[]][(].*[)]", i)
+                    # try to find a squence of characters that define an embedded image
+                    if x:  # assumes that re.search() returns None if nothing found
+                        imgname = re.search(r"[\[].*[]]", i)
+                        imgname = imgname[0][1:-1]
+                        imglink = re.search(r"[(].*[)]", i)
+                        imglink = imglink[0][1:-1]
+                        self.output += con.img(imgname, imglink) + "\n"
 
-        self.lists(-1)  # process any lists that weren't processed yet
-        if paragraph != "":
-            self.output += con.paragraph(paragraph)
-        if blockquote != "":
-            self.output += con.blockquote(blockquote) + "\n"
+                elif i[:2] == "* " or i[:2] == "- " or i[:2] == "+ ":
+                    # unordered (bullet-point) list at "zero" depth (no indentation)
+                    self.lists(0)
+                    temp = self.parseline(i[2:])
+                    self.ulist.append(temp)
+
+                elif (i[:self.indent+2] == self.indent1 + "* " or i[:self.indent+2]
+                    == self.indent1 + "+ " or i[:self.indent+2] == self.indent1 + "- "):
+                    # 1st depth
+                    self.lists(1)
+                    temp = self.parseline(i[self.indent+2:])
+                    self.ulist1.append(temp)
+
+                elif (i[:self.indent*2+2] == self.indent2 + "* " or i[:self.indent*2+2]
+                    == self.indent2 + "+ " or i[:self.indent*2+2] == self.indent2 + "- "):
+                    # 2nd depth
+                    self.lists(2)
+                    temp = self.parseline(i[2*self.indent+2:])
+                    self.ulist2.append(temp)
+
+                elif (i[:self.indent*3+2] == self.indent3 + "* " or i[:self.indent*3+2]
+                    == self.indent3 + "+ " or i[:self.indent*3+2] == self.indent3 + "- "):
+                    # 3rd depth
+                    temp = self.parseline(i[3*self.indent+2:])
+                    self.ulist3.append(temp)
+
+                elif i[0].isdigit() and i[1:3] == ". ":
+                    # ordered list at "zero" depth (no indentation)
+                    self.lists(0)
+                    temp = self.parseline(i[3:])
+                    self.olist.append(temp)
+                elif len(i) >= self.indent and i[self.indent].isdigit() and i[self.indent+1:self.indent+3] == ". ":
+                    self.lists(1)
+                    temp = self.parseline(i[self.indent+3:])
+                    self.olist1.append(temp)
+                elif len(i) >= self.indent*2 and i[self.indent*2].isdigit() and i[self.indent*2+1:self.indent*2+3] == ". ":
+                    self.lists(2)
+                    temp = self.parseline(i[self.indent*2+3:])
+                    self.olist2.append(temp)
+                elif len(i) >= self.indent*3 and i[self.indent*3].isdigit() and i[self.indent*3+1:self.indent*3+3] == ". ":
+                    temp = self.parseline(i[self.indent*3+3:])
+                    self.olist3.append(temp)
+                else:
+                    paragraph += self.parseline(i) + "<br>" + "\n"
+
+            self.lists(-1)  # process any lists that weren't processed yet
+            if paragraph != "":
+                self.output += con.paragraph(paragraph)
+            if blockquote != "":
+                self.output += con.blockquote(blockquote) + "\n"
         return self.output
 
 
