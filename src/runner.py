@@ -3,10 +3,11 @@ import re
 
 
 class Runner:
-    def __init__(self, language: str, title: str, filename="input.md", indent=4):
+    def __init__(self, language: str, title: str, filename="input.md", indent=4, outputfilename="output.html"):
         self.language = language
         self.title = title
         self.filename = filename
+        self.outputfilename = outputfilename
         self.syntax_inline = ["*", "*", "_", "_", "~", "`", "=", "^"]
         self.indent = indent
         self.indent1 = self.indent*" "
@@ -22,12 +23,12 @@ class Runner:
             f'    <title>{self.title}</title>\n'\
             '</head>\n'\
             '<body>\n'
-        with open("output.html", mode="w", encoding="utf-8") as f:
+        with open(self.outputfilename, mode="w", encoding="utf-8") as f:
             data = html_boilerplate
             f.write(data)
 
     def save_file(self, data):
-        with open("output.html", mode="a", encoding="utf-8") as f:
+        with open(self.outputfilename, mode="a", encoding="utf-8") as f:
             f.write(data + "\n</body>" + "\n</html>")
 
     def send_to_edit(self, syntax, string):
@@ -207,7 +208,7 @@ class Runner:
         self.olist3 = []
         with open(self.filename, mode='r', encoding="utf-8") as file:
             for i in file:
-                i = i.rstrip()
+                i = i.rstrip("\r\n")  # strips only LF, CR or CRLF
                 if i == "":
                     self.lists(-1)
                     if paragraph != "":
@@ -219,8 +220,9 @@ class Runner:
                 elif i[0] == "#":  # heading
                     if paragraph != "":
                         self.output += con.paragraph(paragraph) + "\n"
+                    self.lists(-1)
                     self.output += self.parse_heading(i) + "\n"
-                elif i == "---":  # horizontal separator
+                elif i == "---" or i == "***":  # horizontal separator
                     self.output += "<br>\n"
                 elif i[0:2] == "> ":
                     blockquote += (self.parseline(i[2:])) + "\n"
@@ -234,6 +236,7 @@ class Runner:
                         if paragraph != "":
                             self.output += con.paragraph(paragraph) + "\n"
                             paragraph = ""
+                        self.lists(-1)
                         code = True
                 elif code:
                     codeblock += i + "\n"
@@ -290,8 +293,10 @@ class Runner:
                 elif len(i) >= self.indent*3 and i[self.indent*3].isdigit() and i[self.indent*3+1:self.indent*3+3] == ". ":
                     temp = self.parseline(i[self.indent*3+3:])
                     self.olist3.append(temp)
+                elif i[-1] == " ":
+                    paragraph += self.parseline(i.rstrip()) + "<br>" + "\n"
                 else:
-                    paragraph += self.parseline(i) + "<br>" + "\n"
+                    paragraph += self.parseline(i) + "\n"
 
             self.lists(-1)  # process any lists that weren't processed yet
             if paragraph != "":

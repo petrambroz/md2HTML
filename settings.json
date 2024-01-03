@@ -2,5 +2,6 @@
     "language": "cs",
     "title": "dokument",
     "indentation": "4",
-    "file-name": "dokumentace.md"
+    "input-file": "dokumentace.md",
+    "output-file": "output.html"
 }

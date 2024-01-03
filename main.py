@@ -8,8 +8,9 @@ if __name__ == "__main__":
     language = settings["language"]
     title = settings["title"]
     indent = int(settings["indentation"])
-    filename = settings["file-name"]
-    file = runner.Runner(language, title, filename, indent)
+    filename = settings["input-file"]
+    outputfilename = settings["output-file"]
+    file = runner.Runner(language, title, filename, indent, outputfilename)
     data = file.run()
     file.make_file()
     file.save_file(data)

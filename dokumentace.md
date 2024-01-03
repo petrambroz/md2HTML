@@ -5,13 +5,14 @@
 2. [Vstup programu](#vstup)
 3. [Informace pro programátory](#programatori)
 4. [Informace pro uživatele](#uzivatele)
-5. [Průběh práce](#prace)
+5. [Nastavení](#nastaveni)
+6. [Průběh práce](#prace)
 
 ## Úvod {#uvod}
 Program řeší následující problém: ze souboru s textem naformátovaným v MarkDownu vytvoří plnohodnotný soubor HTML, který je zobrazitelný webovým prohlížečem.
 
 ## Vstup programu {#vstup}
-Program příjmá jeden soubor *nazev_souboru.md* a z něj vytvoří sloubor *output.html*. Název souboru je konfigurovatelný a pokud jde o platný textový soubor, není nutné dodržet příponu .md, nicméně pro přehlednost to je vřele doporučeno. Kódování souboru je vyžadováno utf-8.
+Program příjmá jeden soubor *nazev_souboru.md* a z něj vytvoří sloubor *output.html*. Název souboru je konfigurovatelný a pokud jde o platný textový soubor, není nutné dodržet příponu .md, nicméně pro přehlednost to je vřele doporučeno. Výchozí název vstupního souboru je *input.md*. Kódování souboru je vyžadováno utf-8.
 
 Jediným požadavkem na vstupní soubor je jeho platné naformátování, jelikož program je poměrně striktní a jakékoliv i drobné "nesrovnalosti" může vyhodnotit špatně. Platným formátováním se rozumí:
 
@@ -19,7 +20,7 @@ Jediným požadavkem na vstupní soubor je jeho platné naformátování, jeliko
     * každý počátek formátovaného úseku musí být ukončen (a to stejným znakem)
         * `*text*` – toto je platné
         * `_text*` – toto platné není
-        * `*text` – toto také není platné
+        * `*text` – toto také není platné (znak `*` se zobrazí)
 2. Číslované a nečíslované seznamy
     * program podporuje maximálně 4 úrovně odsazení
         * tzn. první "neindentovaný" řádek, poté jednou, dvakrát a třikrát "indentovaný"
@@ -33,7 +34,9 @@ Jediným požadavkem na vstupní soubor je jeho platné naformátování, jeliko
         * lze tyto možnosti kombinovat, avšak je doporučeno se držet pouze jednoho znaku
     * u číslovaných seznamů není brán ohled na to, jakou číslicí je označen, vždy se čísluje 1,2,...,n (vlastnost HTML)
 3. Odstavce
-    * prázdný řáddek označuje odstavec
+    * prázdný řáddek označuje odstaveky
+    * pokud je text rozdělen na více řádků, je chápán jako jeden odstavec (a v HTML je zobrazen na jednom řádku)
+    * 1 či více mezer na konci řádku přidá HTML tag &lt;br&gt;
 4. Nadpisy
     * je podporováno 6 úrovní napisů – `# nadpis 1`, `## nadpis 2` atd.
         * pokud je v souboru nadpis úrovně 7 nebo více, program ohlásí výjimku a ukončí se
@@ -84,7 +87,7 @@ Jde o pomocnou funkci, která postupně zpracuje seznamy vyšší úrovně, poku
 
 Funkce zpracovává jeden řádek ze souboru. Prochází ho znak po znaku (for cyklem) a vyhodnocuje, jak bude se znakem naloženo. Seznam operátorů je uložen v členské proměnné `syntax_inline` typu pole.
 
-Pokud je daný znak operátor, je přidán na konec datové struktury zásobník, pokud v ní ještě takový operátor není. Pokud je, porovná se s posledním prvkem zásobníku a pokud se shodují, je textový řetězec ohraničený těmito operátory předán k dalšímu zpracování. Pokud se neshodují, jsou oba tyto operátory zahozeny, jelikož jde o chybu ve formátovní MarkDownu. Tomuto problému se však snaží předejít podmínka na řádku $92, kdy je otestováno, zda (pokud aktuálně načtený operátor ještě nebyl použit) k aktuálnímu operátoru existuje "párový" operátor, který jeho platnost ukončuje. Pokud tomu tak není, je operátor vyhodnocen jako klasický znak. Pokud tedy na řádku bude výraz např. 2*3, je zobrazen správně. Potom je však vhodné používat znaky "`_`" pro případné formátování, jelikož by mohlo docházet k chybám při určování, co má přesně který operátor ohraničovat.
+Pokud je daný znak operátor, je přidán na konec datové struktury zásobník (implementovaný pomocí pole), pokud v ní ještě takový operátor není. Pokud je, porovná se s posledním prvkem zásobníku a pokud se shodují, je textový řetězec ohraničený těmito operátory předán k dalšímu zpracování. Pokud se neshodují, jsou oba tyto operátory zahozeny, jelikož jde o chybu ve formátovní MarkDownu. Tomuto problému se však snaží předejít podmínka na řádku $92, kdy je otestováno, zda (pokud aktuálně načtený operátor ještě nebyl použit) k aktuálnímu operátoru existuje "párový" operátor, který jeho platnost ukončuje. Pokud tomu tak není, je operátor vyhodnocen jako klasický znak. Pokud tedy na řádku bude výraz např. 2*3, je zobrazen správně. Potom je však vhodné používat znaky "`_`" pro případné formátování, jelikož by mohlo docházet k chybám při určování, co má přesně který operátor ohraničovat.
 
 ##### Funkce `send_to_edit()`
 Funkce volá podle druhu operátoru, který jí byl předán některou z funkcí třídy Convertor, která vrací příslušně naformátovaný text v HTML.
@@ -98,10 +101,10 @@ Druhá metoda ukládá do již vytvořeného souboru již zpracovaný text nafor
 Obsahuje jediný soubor s třídou Convertor, která obsahuje triviální funkce vracející naformátovaný text v html.
 
 ## Informace pro uživatele {#uzivatele}
-Do kořenového adresáře programu (tam, kde je soubor main.py) vložte textový soubor ve formátu MarkDown, který chcete přeložit do HTML. Název souboru by měl být "input.md" (výchozí nastavení), avšak to lze změnit pomocí nastavení. Program se spustí pomocí hlavního skriptu main.py (ideálně pomocí terminálu či ve vámi preferovaném IDE). Výstup bude uložen do souboru output.html. Po zobrazení kladného hlášení je soubor připraven k použití.
+Do kořenového adresáře programu (tam, kde je soubor main.py) vložte textový soubor ve formátu MarkDown, který chcete přeložit do HTML. Název souboru by měl být "input.md" (výchozí název), avšak to lze změnit pomocí nastavení (viz [níže](#nastaveni)). Program se spustí pomocí hlavního skriptu main.py (ideálně pomocí terminálu či ve vámi preferovaném IDE). Výstup bude uložen do souboru output.html. Po zobrazení kladného hlášení je soubor připraven k použití.
 **Pozor:** je důležité, aby byl vstupní soubor v MarkDownu platně naformátovaný, viz [vstup programu](#vstup).
 
-### Nastavení
+## Nastavení {#nastaveni}
 Program nabízí možnost nastavení některých parametrů, které mohou uživateli usnadnit práci. Nastavení se nachází v souboru settings.json, který lze upravit běžným textovým editorem. Měnit můžete pouze hodnoty za dvojtečkou, mezi uvozovkami.
 
 1. "language" = jazyk – uložený v html souboru jako parametr "lang", určuje jazyk dokumentu kvůli správné interpretaci prohlížečem
@@ -110,10 +113,46 @@ Program nabízí možnost nastavení některých parametrů, které mohou uživa
     * výchozí hodnota: "dokument"
 3. "indentation" =  počet mezer, které určují odsazený úsek textu (důležité u seznamů)
     * výchozí hodnota: "4"
-4. "file-name" =  název vstupního souboru, lze nastavit na libovolný textový řetězec, **musí** se však shodovat s názvem vstupního souboru (včetně přípony)
+4. "input-file" =  název vstupního souboru, lze nastavit na libovolný textový řetězec, **musí** se však shodovat s názvem vstupního souboru (včetně přípony)
     * výchozí hodnota: "input.md"
+5. "output-file" = název výstupního souboru
+    * výchozí hodnota: "output.html"
 
 ## Průběh práce {#prace}
 Nejprve jsem začal tím nejjednoduším – modulem html_convertor, viz [html_convertor](#html_convertor). Již ze začátku jsem chtěl mít funkce, které pouze přijímají string a vrací patřičně naformátovaný text v HTML (a vůbec neřeší, co je ve stringu obsaženo), mít oddělené od zbytku programu. Věděl jsem, že procházení celého souboru řádek po řádku a každý řádek znak po znaku bude samo o sobě místy dost nepřehledné, jelikož půjde o spoustu vnořených "ifů" zkoušejících, zda aktuální znak náhodou neznačí začátek nějakého formátovaného úseku. Toto oddělení od zbytku programu také považuji za výhodné proto, že lze třídu Convertor snadno vyjmout a použít bez výrazných změn v takřka jakémkoli jiném programu, který převádí jiný druh formátování do HTML.
 
 Druhým krokem pak bylo napsat program, který bude procházet text a hledat v něm znaky nastavující formátování. Zde bylo důležité určit, které bude program rozeznávat, jelikož MarkDown kromě běžné syntaxe může podporovat některé složitější struktury, jako např. tabulky a poznámky pod čarou, které jsem se rozhodl neimplementovat kvůli jejich složitosti a ne zcela snadnému použití v HTML. Naopak jsem chtěl implementovat věci jako horní a dolní idex, id nadpisů a víceřádkový codeblock. Pro inspiraci a ověření platnosti syntaxe jsem využíval webovou stránku [markdownguide.org](https://www.markdownguide.org).
+
+Původně jsem měl také v plánu program udělat tak, aby výstupní kód v HTML vypadal "hezky", čímž myslím správné odsazení jednotlivých elementů.
+Výstpu programu nyní vypadá takto:
+
+```
+&lt;body&gt;
+&lt;h1&gt;Zápočtový program – převod MarkDownu do HTML&lt;/h1&gt;
+&lt;h2&gt;Obsah&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="#uvod"&gt;Úvod&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#vstup"&gt;Vstup programu&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#programatori"&gt;Informace pro programátory&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#uzivatele"&gt;Informace pro uživatele&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#nastaveni"&gt;Nastavení&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#prace"&gt;Průběh práce&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/body&gt;
+```
+Ale bylo by hezčí, kdyby vypadal takto:
+```
+&lt;body&gt;
+    &lt;h1&gt;Zápočtový program – převod MarkDownu do HTML&lt;/h1&gt;
+    &lt;h2&gt;Obsah&lt;/h2&gt;
+    &lt;ol&gt;
+        &lt;li&gt;&lt;a href="#uvod"&gt;Úvod&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#vstup"&gt;Vstup programu&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#programatori"&gt;Informace pro programátory&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#uzivatele"&gt;Informace pro uživatele&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#nastaveni"&gt;Nastavení&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#prace"&gt;Průběh práce&lt;/a&gt;&lt;/li&gt;
+    &lt;/ol&gt;
+&lt;/body&gt;
+```
+Nicméně to by vyžadovalo další procházení celého HTML souboru a jeho úpravy, případně použití některé externí knihovny. Taková implementace by však byla v rozporu s mým původním plánem – napsat program takový, aby používal naprosté minumum "cizího kódu". To se mi také povedlo dodržet, jediný import je balíček "re", který umožňuje interpretovat regulární výrazy a je součástí běžné instalace pythonu.
