@@ -1,1 +1,0 @@
-`**text**` nebo `__text__`

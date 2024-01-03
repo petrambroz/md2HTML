@@ -121,7 +121,7 @@ class Runner:
             if self.ulist3 != []:
                 temp = con.ul(self.ulist3)
                 if self.ulist2 != []:
-                    self.ulist2.append(temp)
+                    self.ulist2[-1] += "\n" + temp
                 elif self.olist2 != []:
                     self.olist2[-1] += temp
                 self.ulist3 = []
@@ -130,13 +130,13 @@ class Runner:
                 if self.ulist2 != []:
                     self.ulist2[-1] += "\n" + temp
                 elif self.olist2 != []:
-                    self.olist2.append(temp)
+                    self.olist2[-1] += "\n" + temp
                 self.olist3 = []
         if level <= 1:
             if self.ulist2 != []:
                 temp = con.ul(self.ulist2)
                 if self.ulist1 != []:
-                    self.ulist1.append(temp)
+                    self.ulist1[-1] += "\n" + temp
                 elif self.olist1 != []:
                     self.olist1[-1] += temp
                 self.ulist2 = []
@@ -145,13 +145,13 @@ class Runner:
                 if self.ulist1 != []:
                     self.ulist1[-1] += "\n" + temp
                 elif self.olist1 != []:
-                    self.olist1.append(temp)
+                    self.olist1[-1] += "\n" + temp
                 self.olist2 = []
         if level <= 0:
             if self.ulist1 != []:
                 temp = con.ul(self.ulist1)
                 if self.ulist != []:
-                    self.ulist.append(temp)
+                    self.ulist[-1] += "\n" + temp
                 elif self.olist != []:
                     self.olist[-1] += temp
                 self.ulist1 = []
@@ -160,7 +160,7 @@ class Runner:
                 if self.ulist != []:
                     self.ulist[-1] += "\n" + temp
                 elif self.olist != []:
-                    self.olist.append(temp)
+                    self.olist[-1] += "\n" + temp
                 self.olist1 = []
         if level <= -1:
             if self.ulist != []:
@@ -228,9 +228,12 @@ class Runner:
                 elif i == "```":  # codeblock
                     if code:
                         code = False
-                        paragraph += con.codeblock(codeblock)
+                        self.output += con.codeblock(codeblock) + "\n"
                         codeblock = ""
                     else:
+                        if paragraph != "":
+                            self.output += con.paragraph(paragraph) + "\n"
+                            paragraph = ""
                         code = True
                 elif code:
                     codeblock += i + "\n"
@@ -239,7 +242,7 @@ class Runner:
                     x = re.search(r"[!][\[].*[]][(].*[)]", i)
                     # try to find a squence of characters that define an embedded image
                     if x:  # assumes that re.search() returns None if nothing found
-                        imgname = re.search(r"[\[].*[]]", i)
+                        imgname = re.search(r"[\[].*[]]", i)  # assumes None is not returned since expression on line 239 found something
                         imgname = imgname[0][1:-1]
                         imglink = re.search(r"[(].*[)]", i)
                         imglink = imglink[0][1:-1]
@@ -252,21 +255,21 @@ class Runner:
                     self.ulist.append(temp)
 
                 elif (i[:self.indent+2] == self.indent1 + "* " or i[:self.indent+2]
-                    == self.indent1 + "+ " or i[:self.indent+2] == self.indent1 + "- "):
+                      == self.indent1 + "+ " or i[:self.indent+2] == self.indent1 + "- "):
                     # 1st depth
                     self.lists(1)
                     temp = self.parseline(i[self.indent+2:])
                     self.ulist1.append(temp)
 
                 elif (i[:self.indent*2+2] == self.indent2 + "* " or i[:self.indent*2+2]
-                    == self.indent2 + "+ " or i[:self.indent*2+2] == self.indent2 + "- "):
+                      == self.indent2 + "+ " or i[:self.indent*2+2] == self.indent2 + "- "):
                     # 2nd depth
                     self.lists(2)
                     temp = self.parseline(i[2*self.indent+2:])
                     self.ulist2.append(temp)
 
                 elif (i[:self.indent*3+2] == self.indent3 + "* " or i[:self.indent*3+2]
-                    == self.indent3 + "+ " or i[:self.indent*3+2] == self.indent3 + "- "):
+                      == self.indent3 + "+ " or i[:self.indent*3+2] == self.indent3 + "- "):
                     # 3rd depth
                     temp = self.parseline(i[3*self.indent+2:])
                     self.ulist3.append(temp)
