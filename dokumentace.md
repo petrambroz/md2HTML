@@ -12,7 +12,7 @@
 Program řeší následující problém: ze souboru s textem naformátovaným v MarkDownu vytvoří plnohodnotný soubor HTML, který je zobrazitelný webovým prohlížečem.
 
 ## Vstup programu {#vstup}
-Program příjmá jeden soubor *nazev_souboru.md* a z něj vytvoří sloubor *output.html*. Název souboru je konfigurovatelný a pokud jde o platný textový soubor, není nutné dodržet příponu .md, nicméně pro přehlednost to je vřele doporučeno. Výchozí název vstupního souboru je *input.md*. Kódování souboru je vyžadováno utf-8.
+Program přijímá jeden soubor *nazev_souboru.md* a z něj vytvoří sloubor *output.html*. Název souboru je konfigurovatelný a pokud jde o platný textový soubor, není nutné dodržet příponu .md, nicméně pro přehlednost to je vřele doporučeno. Výchozí název vstupního souboru je *input.md*. Kódování souboru je vyžadováno utf-8.
 
 Jediným požadavkem na vstupní soubor je jeho platné naformátování, jelikož program je poměrně striktní a jakékoliv i drobné "nesrovnalosti" může vyhodnotit špatně. Platným formátováním se rozumí:
 
@@ -21,6 +21,7 @@ Jediným požadavkem na vstupní soubor je jeho platné naformátování, jeliko
         * `*text*` – toto je platné
         * `_text*` – toto platné není
         * `*text` – toto také není platné (znak `*` se zobrazí)
+    * pokud je před kterýmkoli znakem \\, je následující znak zpracován jako běžný (tj. pokud je operátor, je chápán jako běžný znak)
 2. Číslované a nečíslované seznamy
     * program podporuje maximálně 4 úrovně odsazení
         * tzn. první "neindentovaný" řádek, poté jednou, dvakrát a třikrát "indentovaný"
@@ -34,7 +35,7 @@ Jediným požadavkem na vstupní soubor je jeho platné naformátování, jeliko
         * lze tyto možnosti kombinovat, avšak je doporučeno se držet pouze jednoho znaku
     * u číslovaných seznamů není brán ohled na to, jakou číslicí je označen, vždy se čísluje 1,2,...,n (vlastnost HTML)
 3. Odstavce
-    * prázdný řáddek označuje odstaveky
+    * prázdný řáddek označuje odstavce
     * pokud je text rozdělen na více řádků, je chápán jako jeden odstavec (a v HTML je zobrazen na jednom řádku)
     * 1 či více mezer na konci řádku přidá HTML tag &lt;br&gt;
 4. Nadpisy
@@ -60,18 +61,18 @@ Program je vhodně rozdělen do tří hlavních souborů. V kořenovém adresá�
 Po spuštění programu main.py je nejprve načteno nastavení ze souboru settings.json, které je předáno konstruktoru třídy Runner při vytváření nové instance. Do proměnné `data` je funkcí `run()` z objektu třídy Runner je uložen naformátovaný text v HTML, poté je metodou `make_file()` do souboru output.html uložena hlavička (či je vytvořen soubor nový) a metodou `save_file()` je do tohoto souboru uložen text z proměnné data. Tím běh celého programu končí.
 
 #### Modul runner.py
-Tento soubor, který je obsažen v modulu `src` obsahuje hlavní část programu. V jeho konstruktoru je načten text z MarkDown souboru, jsou uloženy proměnné později použité k nastavení jazyka, názvu dokumentu (html tag "title"), počet mezer označující odsazený blok.
+Tento soubor, který je obsažen v modulu `src` obsahuje hlavní část programu. V konstruktoru jsou uloženy proměnné později použité k nastavení jazyka, názvu dokumentu (html tag "title"), počet mezer označující odsazený blok.
 
 ##### Funkce `run()`
 Hlavní částí je funkce `run()`, která postupně prochází načtený soubor řádek po řádku a každý řádek zpracuje.
 
-Prvně se testuje, zda je aktuální řádek prázdný – pak jsou "ukončeny" veškeré předchozí rozpracované bloky formátování (seznamy, odstavec, citace), jsou náležtě zprácovány funcí třídy `Convertor` a přidány k výstupu.
+Prvně se testuje, zda je aktuální řádek prázdný – pak jsou "ukončeny" veškeré předchozí rozpracované bloky formátování (seznamy, odstavec, citace), jsou náležitě zpracovány funckí třídy `Convertor` a přidány k výstupu.
 
 Dále se testuje, zda je na řádku horizontální separátor. Poté zda řádek označuje začátek či konec bloku kódu.
 
-Řádek $234 zkouší, zda řádek začíná vykřičníkem a pokud ano, je pomocí regulárního výrazu zjištěno, zda zbytek řádku odpovídá syntaxi vložení obrázku. Pokud ano, je opět regulárním výrazem z řádku načten zvlášť název a odkaz na obrázek, což je potom předáno funkci třídy `Convertor` a přidáno k výstupu.
+Řádek $250 zkouší, zda řádek začíná vykřičníkem a pokud ano, je pomocí regulárního výrazu zjištěno, zda zbytek řádku odpovídá syntaxi vložení obrázku. Pokud ano, je opět regulárním výrazem z řádku načten zvlášť název a odkaz na obrázek, což je potom předáno funkci třídy `Convertor` a přidáno k výstupu.
 
-Řádky $244-285 zkouší, zda je aktuální řádek nějaký seznam a podle jeho úrovně je přidán do patřičné proměnné. Ještě předtím je však pomocí metody `lists()` provedeno zpracování všech předchozích, ještě neukončených částí seznamu.
+Řádky $260-301 zkouší, zda je aktuální řádek nějaký seznam a podle jeho úrovně je přidán do patřičné proměnné. Ještě předtím je však pomocí metody `lists()` provedeno zpracování všech předchozích, ještě neukončených částí seznamu.
 
 Pokud se řádek nevyznačuje ničím speciálním, je přidán k aktuálnímu odstavci.
 
@@ -87,10 +88,10 @@ Jde o pomocnou funkci, která postupně zpracuje seznamy vyšší úrovně, poku
 
 Funkce zpracovává jeden řádek ze souboru. Prochází ho znak po znaku (for cyklem) a vyhodnocuje, jak bude se znakem naloženo. Seznam operátorů je uložen v členské proměnné `syntax_inline` typu pole.
 
-Pokud je daný znak operátor, je přidán na konec datové struktury zásobník (implementovaný pomocí pole), pokud v ní ještě takový operátor není. Pokud je, porovná se s posledním prvkem zásobníku a pokud se shodují, je textový řetězec ohraničený těmito operátory předán k dalšímu zpracování. Pokud se neshodují, jsou oba tyto operátory zahozeny, jelikož jde o chybu ve formátovní MarkDownu. Tomuto problému se však snaží předejít podmínka na řádku $92, kdy je otestováno, zda (pokud aktuálně načtený operátor ještě nebyl použit) k aktuálnímu operátoru existuje "párový" operátor, který jeho platnost ukončuje. Pokud tomu tak není, je operátor vyhodnocen jako klasický znak. Pokud tedy na řádku bude výraz např. 2*3, je zobrazen správně. Potom je však vhodné používat znaky "`_`" pro případné formátování, jelikož by mohlo docházet k chybám při určování, co má přesně který operátor ohraničovat.
+Pokud je daný znak operátor, je přidán na konec datové struktury zásobník (implementovaný pomocí pole), pokud v ní ještě takový operátor není. Pokud je, porovná se s posledním prvkem zásobníku a pokud se shodují, je textový řetězec ohraničený těmito operátory předán k dalšímu zpracování. Pokud se neshodují, jsou oba tyto operátory zahozeny, jelikož jde o chybu ve formátovní MarkDownu. Tomuto problému se však snaží předejít podmínka na řádku $91, kdy je otestováno, zda (pokud aktuálně načtený operátor ještě nebyl použit) k aktuálnímu operátoru existuje "párový" operátor, který jeho platnost ukončuje. Pokud tomu tak není, je operátor vyhodnocen jako klasický znak. Pokud tedy na řádku bude výraz např. 2*3, je zobrazen správně. Potom je však vhodné používat znaky "`_`" pro případné formátování, jelikož by mohlo docházet k chybám při určování, co má přesně který operátor ohraničovat.
 
 ##### Funkce `send_to_edit()`
-Funkce volá podle druhu operátoru, který jí byl předán některou z funkcí třídy Convertor, která vrací příslušně naformátovaný text v HTML.
+Funkce volá podle druhu operátoru, který jí byl předán funkcí `parseline()` některou z funkcí třídy Convertor, která vrací příslušně naformátovaný text v HTML. Zde je také možné snadno přidat další znaky, které budou v toku textu chápány jako operátory. V takovém případě je navíc nutné je přidat do seznamu `self.syntax_inline` v konstruktoru a také zavést jejich patřičné zpracování v modulu `Convertor`.
 
 ##### Metody `make_file()` a `save_file()`
 První z těchto metod uloží do prázdného souboru output.html hlavičku html souboru s doplněnými atributy jako je jazyk a title.
@@ -101,11 +102,11 @@ Druhá metoda ukládá do již vytvořeného souboru již zpracovaný text nafor
 Obsahuje jediný soubor s třídou Convertor, která obsahuje triviální funkce vracející naformátovaný text v html.
 
 ## Informace pro uživatele {#uzivatele}
-Do kořenového adresáře programu (tam, kde je soubor main.py) vložte textový soubor ve formátu MarkDown, který chcete přeložit do HTML. Název souboru by měl být "input.md" (výchozí název), avšak to lze změnit pomocí nastavení (viz [níže](#nastaveni)). Program se spustí pomocí hlavního skriptu main.py (ideálně pomocí terminálu či ve vámi preferovaném IDE). Výstup bude uložen do souboru output.html. Po zobrazení kladného hlášení je soubor připraven k použití.
+Do kořenového adresáře programu (tam, kde je soubor main.py) vložte textový soubor ve formátu MarkDown, který chcete přeložit do HTML. Název souboru by měl být "input.md" (výchozí název), avšak to lze změnit pomocí nastavení (viz [níže](#nastaveni)). Program se spustí pomocí hlavního skriptu main.py (pomocí terminálu či ve vámi preferovaném IDE). Výstup bude uložen do souboru output.html. Po zobrazení kladného hlášení je soubor připraven k použití.
 **Pozor:** je důležité, aby byl vstupní soubor v MarkDownu platně naformátovaný, viz [vstup programu](#vstup).
 
 ## Nastavení {#nastaveni}
-Program nabízí možnost nastavení některých parametrů, které mohou uživateli usnadnit práci. Nastavení se nachází v souboru settings.json, který lze upravit běžným textovým editorem. Měnit můžete pouze hodnoty za dvojtečkou, mezi uvozovkami.
+Program nabízí možnost nastavení některých parametrů, které mohou uživateli usnadnit práci. Nastavení se nachází v souboru settings.json, který lze upravit běžným textovým editorem. Měnit je možné pouze hodnoty za dvojtečkou, mezi uvozovkami.
 
 1. "language" = jazyk – uložený v html souboru jako parametr "lang", určuje jazyk dokumentu kvůli správné interpretaci prohlížečem
     * výchozí hodnota (čeština): "cs"

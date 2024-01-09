@@ -60,13 +60,19 @@ class Runner:
         string = [""]
         skip = False
         link = False
+        escape = False
         linkbody = [""]
         temp = ""
         for index, i in enumerate(line):
             if skip:
                 skip = False
                 continue
+            if escape:
+                string[-1] += i
+                escape = False
+                continue
             if i == "\\":
+                escape = True
                 continue
             if link:
                 if i == "]":
@@ -245,7 +251,7 @@ class Runner:
                     x = re.search(r"[!][\[].*[]][(].*[)]", i)
                     # try to find a squence of characters that define an embedded image
                     if x:  # assumes that re.search() returns None if nothing found
-                        imgname = re.search(r"[\[].*[]]", i)  # assumes None is not returned since expression on line 239 found something
+                        imgname = re.search(r"[\[].*[]]", i)  # assumes None is not returned since expression on line 251 found something
                         imgname = imgname[0][1:-1]
                         imglink = re.search(r"[(].*[)]", i)
                         imglink = imglink[0][1:-1]
