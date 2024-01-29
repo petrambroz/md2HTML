@@ -226,9 +226,13 @@ class Runner:
                 elif i[0] == "#":  # heading
                     if paragraph != "":
                         self.output += con.paragraph(paragraph) + "\n"
+                        paragraph = ""
                     self.lists(-1)
                     self.output += self.parse_heading(i) + "\n"
                 elif i == "---" or i == "***":  # horizontal separator
+                    if paragraph != "":
+                        self.output += con.paragraph(paragraph) + "\n"
+                        paragraph = ""
                     self.output += "<br>\n"
                 elif i[0:2] == "> ":
                     blockquote += (self.parseline(i[2:])) + "\n"
