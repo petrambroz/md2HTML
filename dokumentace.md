@@ -2,17 +2,46 @@
 
 ## Obsah
 1. [Úvod](#uvod)
-2. [Vstup programu](#vstup)
-3. [Informace pro programátory](#programatori)
-4. [Informace pro uživatele](#uzivatele)
-5. [Nastavení](#nastaveni)
-6. [Průběh práce](#prace)
+1. [Informace pro uživatele](#uzivatele)
+1. [Nastavení](#nastaveni)
+1. [Argumenty](#argumenty)
+1. [Vstup programu](#vstup)
+1. [Informace pro programátory](#programatori)
+1. [Průběh práce](#prace)
 
 ## Úvod {#uvod}
 Program řeší následující problém: ze souboru s textem naformátovaným v MarkDownu vytvoří plnohodnotný soubor HTML, který je zobrazitelný webovým prohlížečem.
 
+## Informace pro uživatele {#uzivatele}
+Do kořenového adresáře programu (tam, kde je soubor main.py) vložte textový soubor ve formátu MarkDown, který chcete přeložit do HTML. Název souboru by měl být "input.md" (výchozí název), avšak to lze změnit pomocí nastavení (viz [níže](#nastaveni)) či argumentů. Program se spustí pomocí hlavního skriptu main.py (pomocí terminálu či ve vámi preferovaném IDE). Výstup bude uložen do souboru output.html (název je také konfigurovatelný pomocí nastavení) v kořenovém adresáři programu. Po zobrazení kladného hlášení je soubor připraven k použití.
+**Pozor:** je důležité, aby byl vstupní soubor v MarkDownu platně naformátovaný, viz [vstup programu](#vstup).
+
+## Nastavení {#nastaveni}
+Program nabízí možnost nastavení některých parametrů, které mohou uživateli usnadnit práci. Nastavení se nachází v souboru settings.json, který lze upravit běžným textovým editorem. Měnit je možné pouze hodnoty za dvojtečkou, mezi uvozovkami.
+
+1. "language" = jazyk – uložený v html souboru jako parametr "lang", určuje jazyk dokumentu kvůli správné interpretaci prohlížečem
+    * výchozí hodnota (čeština): "cs"
+2. "title" = název dokumentu, je poté zobrazen v prohlížeči jako název panelu
+    * výchozí hodnota: "dokument"
+3. "indentation" =  počet mezer, které určují odsazený úsek textu (důležité u seznamů)
+    * výchozí hodnota: "4"
+4. "input-file" =  název vstupního souboru, lze nastavit na libovolný textový řetězec, **musí** se však shodovat s názvem vstupního souboru (včetně přípony)
+    * výchozí hodnota: "input.md"
+5. "output-file" = název výstupního souboru
+    * výchozí hodnota: "output.html"
+
+## Argumenty {#argumenty}
+Při spoušení programu je možné přímo v přímo v příkazovém řádku specifikovat název vstupního a výstupního souboru pomocí argumentů takto:
+* -i nebo --input - vstupní soubor
+* -o nebo --output - výstupní soubor
+
+Použití pak vypadá následovně:
+ `python main.py -i input.md -o output.md` či `python main.py --input input.md --output output.md`.
+Za "input.md" a "output.md" lze dosadit jakýkoliv jiný název, lze použít i pouze jeden z argumentů.
+**Použití argumentů má prioritu před názvy nastavenými v konfiguračním souboru settings.json.**
+
 ## Vstup programu {#vstup}
-Program přijímá jeden soubor *nazev_souboru.md* a z něj vytvoří sloubor *output.html*. Název souboru je konfigurovatelný a pokud jde o platný textový soubor, není nutné dodržet příponu .md, nicméně pro přehlednost to je vřele doporučeno. Výchozí název vstupního souboru je *input.md*. Kódování souboru je vyžadováno utf-8.
+Program přijímá jeden soubor *input.md* a z něj vytvoří soubor *output.html*. Název souboru je konfigurovatelný a pokud jde o platný textový soubor, není nutné dodržet příponu .md, nicméně pro přehlednost to je vřele doporučeno. Výchozí název vstupního souboru je *input.md*. Kódování souboru je vyžadováno utf-8.
 
 Jediným požadavkem na vstupní soubor je jeho platné naformátování, jelikož program je poměrně striktní a jakékoliv i drobné "nesrovnalosti" může vyhodnotit špatně. Platným formátováním se rozumí:
 
@@ -34,10 +63,11 @@ Jediným požadavkem na vstupní soubor je jeho platné naformátování, jeliko
     * nečíslované seznamy lze označit znakem *, + nebo -
         * lze tyto možnosti kombinovat, avšak je doporučeno se držet pouze jednoho znaku
     * u číslovaných seznamů není brán ohled na to, jakou číslicí je označen, vždy se čísluje 1,2,...,n (vlastnost HTML)
+    * maximální číslice u číslovaného seznamu je 9, dvojciferné program nerozpoznává
 3. Odstavce
     * prázdný řáddek označuje odstavce
     * pokud je text rozdělen na více řádků, je chápán jako jeden odstavec (a v HTML je zobrazen na jednom řádku)
-    * 1 či více mezer na konci řádku přidá HTML tag &lt;br&gt;
+    * 1 či více mezer na konci řádku přidá HTML tag <br>
 4. Nadpisy
     * je podporováno 6 úrovní napisů – `# nadpis 1`, `## nadpis 2` atd.
         * pokud je v souboru nadpis úrovně 7 nebo více, program ohlásí výjimku a ukončí se
@@ -101,23 +131,8 @@ Druhá metoda ukládá do již vytvořeného souboru již zpracovaný text nafor
 #### Modul html_convertor {#html_convertor}
 Obsahuje jediný soubor s třídou Convertor, která obsahuje triviální funkce vracející naformátovaný text v html.
 
-## Informace pro uživatele {#uzivatele}
-Do kořenového adresáře programu (tam, kde je soubor main.py) vložte textový soubor ve formátu MarkDown, který chcete přeložit do HTML. Název souboru by měl být "input.md" (výchozí název), avšak to lze změnit pomocí nastavení (viz [níže](#nastaveni)). Program se spustí pomocí hlavního skriptu main.py (pomocí terminálu či ve vámi preferovaném IDE). Výstup bude uložen do souboru output.html. Po zobrazení kladného hlášení je soubor připraven k použití.
-**Pozor:** je důležité, aby byl vstupní soubor v MarkDownu platně naformátovaný, viz [vstup programu](#vstup).
-
-## Nastavení {#nastaveni}
-Program nabízí možnost nastavení některých parametrů, které mohou uživateli usnadnit práci. Nastavení se nachází v souboru settings.json, který lze upravit běžným textovým editorem. Měnit je možné pouze hodnoty za dvojtečkou, mezi uvozovkami.
-
-1. "language" = jazyk – uložený v html souboru jako parametr "lang", určuje jazyk dokumentu kvůli správné interpretaci prohlížečem
-    * výchozí hodnota (čeština): "cs"
-2. "title" = název dokumentu, je poté zobrazen v prohlížeči jako název panelu
-    * výchozí hodnota: "dokument"
-3. "indentation" =  počet mezer, které určují odsazený úsek textu (důležité u seznamů)
-    * výchozí hodnota: "4"
-4. "input-file" =  název vstupního souboru, lze nastavit na libovolný textový řetězec, **musí** se však shodovat s názvem vstupního souboru (včetně přípony)
-    * výchozí hodnota: "input.md"
-5. "output-file" = název výstupního souboru
-    * výchozí hodnota: "output.html"
+### Testování
+Složka `tests` obsahuje 4 soubory ve formátu markdown, které slouží pro rychlé otestování funkce programu. Do html je lze rychle naráz přeložit pomocí skriptu `test.py`. Výsledné html soubory jsou rovněž uloženy do složky `tests`
 
 ## Průběh práce {#prace}
 Nejprve jsem začal tím nejjednoduším – modulem html_convertor, viz [html_convertor](#html_convertor). Již ze začátku jsem chtěl mít funkce, které pouze přijímají string a vrací patřičně naformátovaný text v HTML (a vůbec neřeší, co je ve stringu obsaženo), mít oddělené od zbytku programu. Věděl jsem, že procházení celého souboru řádek po řádku a každý řádek znak po znaku bude samo o sobě místy dost nepřehledné, jelikož půjde o spoustu vnořených "ifů" zkoušejících, zda aktuální znak náhodou neznačí začátek nějakého formátovaného úseku. Toto oddělení od zbytku programu také považuji za výhodné proto, že lze třídu Convertor snadno vyjmout a použít bez výrazných změn v takřka jakémkoli jiném programu, který převádí jiný druh formátování do HTML.
@@ -128,33 +143,33 @@ Původně jsem měl také v plánu program udělat tak, aby výstupní kód v HT
 Výstpu programu nyní vypadá takto:
 
 ```
-&lt;body&gt;
-&lt;h1&gt;Zápočtový program – převod MarkDownu do HTML&lt;/h1&gt;
-&lt;h2&gt;Obsah&lt;/h2&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;a href="#uvod"&gt;Úvod&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="#vstup"&gt;Vstup programu&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="#programatori"&gt;Informace pro programátory&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="#uzivatele"&gt;Informace pro uživatele&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="#nastaveni"&gt;Nastavení&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="#prace"&gt;Průběh práce&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/body&gt;
+<body>
+<h1>Zápočtový program – převod MarkDownu do HTML</h1>
+<h2>Obsah</h2>
+<ol>
+<li><a href="#uvod">Úvod</a></li>
+<li><a href="#vstup">Vstup programu</a></li>
+<li><a href="#programatori">Informace pro programátory</a></li>
+<li><a href="#uzivatele">Informace pro uživatele</a></li>
+<li><a href="#nastaveni">Nastavení</a></li>
+<li><a href="#prace">Průběh práce</a></li>
+</ol>
+</body>
 ```
 Ale bylo by hezčí, kdyby vypadal takto:
 ```
-&lt;body&gt;
-    &lt;h1&gt;Zápočtový program – převod MarkDownu do HTML&lt;/h1&gt;
-    &lt;h2&gt;Obsah&lt;/h2&gt;
-    &lt;ol&gt;
-        &lt;li&gt;&lt;a href="#uvod"&gt;Úvod&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href="#vstup"&gt;Vstup programu&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href="#programatori"&gt;Informace pro programátory&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href="#uzivatele"&gt;Informace pro uživatele&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href="#nastaveni"&gt;Nastavení&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href="#prace"&gt;Průběh práce&lt;/a&gt;&lt;/li&gt;
-    &lt;/ol&gt;
-&lt;/body&gt;
+<body>
+    <h1>Zápočtový program – převod MarkDownu do HTML</h1>
+    <h2>Obsah</h2>
+    <ol>
+        <li><a href="#uvod">Úvod</a></li>
+        <li><a href="#vstup">Vstup programu</a></li>
+        <li><a href="#programatori">Informace pro programátory</a></li>
+        <li><a href="#uzivatele">Informace pro uživatele</a></li>
+        <li><a href="#nastaveni">Nastavení</a></li>
+        <li><a href="#prace">Průběh práce</a></li>
+    </ol>
+</body>
 ```
 Nicméně to by vyžadovalo další procházení celého HTML souboru a jeho úpravy, případně použití některé externí knihovny. Taková implementace by však byla v rozporu s mým původním plánem – napsat program takový, aby používal naprosté minumum "cizího kódu". To se mi také povedlo dodržet, jediný import je balíček "re", který umožňuje interpretovat regulární výrazy a je součástí běžné instalace pythonu.
 Také jsem jednotlivé výstupy převodu do HTML testoval v [HTML validátoru](https://validator.w3.org) a snažil se pro případné nalezené chyby opravit kód tak, aby (ideálně) vždy generoval validní HTML výstup. 

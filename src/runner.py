@@ -185,8 +185,8 @@ class Runner:
             level += 1
             i = string[level]
         if level > 6:
-            raise Exception("MarkDown and HTML only support 6 levels of headings."
-                            "There was a heading with level 7 or more in your file.")
+            raise Exception("Markdown a HTML podporuje pouze 6 úrovní nadpisů."
+                            "Ve vstupním souboru byl někde nadpis úrovně 7 nebo větší.")
         if string[level] == " ":
             string = string[level+1:]
         else:
