@@ -70,9 +70,9 @@ Prvně se testuje, zda je aktuální řádek prázdný – pak jsou "ukončeny" 
 
 Dále se testuje, zda je na řádku horizontální separátor. Poté zda řádek označuje začátek či konec bloku kódu.
 
-Řádek $250 zkouší, zda řádek začíná vykřičníkem a pokud ano, je pomocí regulárního výrazu zjištěno, zda zbytek řádku odpovídá syntaxi vložení obrázku. Pokud ano, je opět regulárním výrazem z řádku načten zvlášť název a odkaz na obrázek, což je potom předáno funkci třídy `Convertor` a přidáno k výstupu.
+Řádek 254 zkouší, zda řádek začíná vykřičníkem a pokud ano, je pomocí regulárního výrazu zjištěno, zda zbytek řádku odpovídá syntaxi vložení obrázku. Pokud ano, je opět regulárním výrazem z řádku načten zvlášť název a odkaz na obrázek, což je potom předáno funkci třídy `Convertor` a přidáno k výstupu.
 
-Řádky $260-301 zkouší, zda je aktuální řádek nějaký seznam a podle jeho úrovně je přidán do patřičné proměnné. Ještě předtím je však pomocí metody `lists()` provedeno zpracování všech předchozích, ještě neukončených částí seznamu.
+Řádky 264-305 zkouší, zda je aktuální řádek nějaký seznam a podle jeho úrovně je přidán do patřičné proměnné. Ještě předtím je však pomocí metody `lists()` provedeno zpracování všech předchozích, ještě neukončených částí seznamu.
 
 Pokud se řádek nevyznačuje ničím speciálním, je přidán k aktuálnímu odstavci.
 
@@ -88,7 +88,7 @@ Jde o pomocnou funkci, která postupně zpracuje seznamy vyšší úrovně, poku
 
 Funkce zpracovává jeden řádek ze souboru. Prochází ho znak po znaku (for cyklem) a vyhodnocuje, jak bude se znakem naloženo. Seznam operátorů je uložen v členské proměnné `syntax_inline` typu pole.
 
-Pokud je daný znak operátor, je přidán na konec datové struktury zásobník (implementovaný pomocí pole), pokud v ní ještě takový operátor není. Pokud je, porovná se s posledním prvkem zásobníku a pokud se shodují, je textový řetězec ohraničený těmito operátory předán k dalšímu zpracování. Pokud se neshodují, jsou oba tyto operátory zahozeny, jelikož jde o chybu ve formátovní MarkDownu. Tomuto problému se však snaží předejít podmínka na řádku $91, kdy je otestováno, zda (pokud aktuálně načtený operátor ještě nebyl použit) k aktuálnímu operátoru existuje "párový" operátor, který jeho platnost ukončuje. Pokud tomu tak není, je operátor vyhodnocen jako klasický znak. Pokud tedy na řádku bude výraz např. 2*3, je zobrazen správně. Potom je však vhodné používat znaky "`_`" pro případné formátování, jelikož by mohlo docházet k chybám při určování, co má přesně který operátor ohraničovat.
+Pokud je daný znak operátor, je přidán na konec datové struktury zásobník (implementovaný pomocí pole), pokud v ní ještě takový operátor není. Pokud je, porovná se s posledním prvkem zásobníku a pokud se shodují, je textový řetězec ohraničený těmito operátory předán k dalšímu zpracování. Pokud se neshodují, jsou oba tyto operátory zahozeny, jelikož jde o chybu ve formátovní MarkDownu. Tomuto problému se však snaží předejít podmínka na řádku 91, kdy je otestováno, zda (pokud aktuálně načtený operátor ještě nebyl použit) k aktuálnímu operátoru existuje "párový" operátor, který jeho platnost ukončuje. Pokud tomu tak není, je operátor vyhodnocen jako klasický znak. Pokud tedy na řádku bude výraz např. 2*3, je zobrazen správně. Potom je však vhodné používat znaky "`_`" pro případné formátování, jelikož by mohlo docházet k chybám při určování, co má přesně který operátor ohraničovat.
 
 ##### Funkce `send_to_edit()`
 Funkce volá podle druhu operátoru, který jí byl předán funkcí `parseline()` některou z funkcí třídy Convertor, která vrací příslušně naformátovaný text v HTML. Zde je také možné snadno přidat další znaky, které budou v toku textu chápány jako operátory. V takovém případě je navíc nutné je přidat do seznamu `self.syntax_inline` v konstruktoru a také zavést jejich patřičné zpracování v modulu `Convertor`.
