@@ -68,13 +68,14 @@ Za "input.md" a "output.md" lze dosadit jakýkoliv jiný název, lze použít i 
 <li>program podporuje maximálně 4 úrovně odsazení
 <ul>
 <li>tzn. první "neindentovaný" řádek, poté jednou, dvakrát a třikrát "indentovaný"</li>
+<li>při pokusu o použití více úrovní indentace je zobrazena chybová hláška</li>
 </ul></li>
 <li>další řádek může být odsazený pouze o 1 více než předchozí (jednou odsazený řádek může následovat řádek jednou či dvakrát odsazený, ale ne třikrát)</li>
 <li>v celém MarkDown dokumentu musí být dodržen jednotný styl odsazení (je konfigurovatelný)
 <ul>
 <li>odsazení je provedeno pomocí mezer, a to ve stanovených násobcích (doporučuje se používat 2 nebo 4)</li>
 </ul></li>
-<li>prázdná řádek mezi jednotlivými seznamy vytvoří seznamy oddělené (nový element ol či ul)
+<li>prázdný řádek mezi jednotlivými seznamy vytvoří seznamy oddělené (nový element ol či ul)
 <ul>
 <li>prázdný řádek musí být i mezi začátkem seznamu a případným předchozím odstavcem či jiným elementem</li>
 </ul></li>
@@ -85,6 +86,7 @@ Za "input.md" a "output.md" lze dosadit jakýkoliv jiný název, lze použít i 
 </ul></li>
 <li>u číslovaných seznamů není brán ohled na to, jakou číslicí je označen, vždy se čísluje 1,2,...,n (vlastnost HTML)</li>
 <li>maximální číslice u číslovaného seznamu je 9, dvojciferné program nerozpoznává</li>
+<li>při nesprávném nastavení indentace či výskytu řádku nerespektujícího správný formát seznamů je zobrazena chybová hláška, v takovém případě je vhodné zkontrolovat korektnost indentace a jejího nastavení v konfiguračním souboru</li>
 </ul></li>
 <li>Odstavce<ul>
 <li>prázdný řáddek označuje odstavce</li>

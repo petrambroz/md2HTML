@@ -54,16 +54,18 @@ Jediným požadavkem na vstupní soubor je jeho platné naformátování, jeliko
 2. Číslované a nečíslované seznamy
     * program podporuje maximálně 4 úrovně odsazení
         * tzn. první "neindentovaný" řádek, poté jednou, dvakrát a třikrát "indentovaný"
+        * při pokusu o použití více úrovní indentace je zobrazena chybová hláška
     * další řádek může být odsazený pouze o 1 více než předchozí (jednou odsazený řádek může následovat řádek jednou či dvakrát odsazený, ale ne třikrát)
     * v celém MarkDown dokumentu musí být dodržen jednotný styl odsazení (je konfigurovatelný)
         * odsazení je provedeno pomocí mezer, a to ve stanovených násobcích (doporučuje se používat 2 nebo 4)
-    * prázdná řádek mezi jednotlivými seznamy vytvoří seznamy oddělené (nový element ol či ul)
+    * prázdný řádek mezi jednotlivými seznamy vytvoří seznamy oddělené (nový element ol či ul)
         * prázdný řádek musí být i mezi začátkem seznamu a případným předchozím odstavcem či jiným elementem
     * číslované a nečíslované seznamy lze kombinovat, avšak na jedné úrovní smí být pouze jeden druh (nemohou se střídat číslované a nečíslované řádky se stejným odsazením)
     * nečíslované seznamy lze označit znakem *, + nebo -
         * lze tyto možnosti kombinovat, avšak je doporučeno se držet pouze jednoho znaku
     * u číslovaných seznamů není brán ohled na to, jakou číslicí je označen, vždy se čísluje 1,2,...,n (vlastnost HTML)
     * maximální číslice u číslovaného seznamu je 9, dvojciferné program nerozpoznává
+    * při nesprávném nastavení indentace či výskytu řádku nerespektujícího správný formát seznamů je zobrazena chybová hláška, v takovém případě je vhodné zkontrolovat korektnost indentace a jejího nastavení v konfiguračním souboru
 3. Odstavce
     * prázdný řáddek označuje odstavce
     * pokud je text rozdělen na více řádků, je chápán jako jeden odstavec (a v HTML je zobrazen na jednom řádku)

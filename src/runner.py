@@ -15,6 +15,8 @@ class Runner:
         self.indent3 = 3*self.indent*" "
 
     def make_file(self):
+        """Creates a basic head element with language, encoding and title settings.
+        """
         html_boilerplate = '<!DOCTYPE html>\n'\
             f'<html lang="{self.language}">\n'\
             '<head>\n'\
@@ -32,6 +34,9 @@ class Runner:
             f.write(data + "\n</body>" + "\n</html>")
 
     def send_to_edit(self, syntax, string):
+        """Receives a string to be formatted by html tags. Depending on the operator character, the string is 
+        passed to the respective funcion from the html_converter module.
+        """
         if syntax == "**" or syntax == "__":
             result = con.bold(string)
         elif syntax == "*" or syntax == "_":
@@ -49,12 +54,17 @@ class Runner:
         return result
 
     def condese(self, list: list):
+        """Creates a sigle string from a list of characters created by parseline funcion.
+        """
         output = ""
         for i in list:
             output += i
         return output.strip()
 
     def parseline(self, line: str):
+        """Accepts a string, tries to find formatted parts of text which then formatted by the send_to_edit function.
+        Returns a string formatted by html tags.
+        """
         line = line.strip()
         syntax = [""]
         string = [""]
@@ -124,6 +134,9 @@ class Runner:
         return string
 
     def lists(self, level):
+        """Finds any unfinished indented lists and appends them to the correct previous list. "level" variable indicates which
+        lists level is to be kept unfinished. -1 finishes all lists and appends them to output. 
+        """
         if level <= 2:
             if self.ulist3 != []:
                 temp = con.ul(self.ulist3)
@@ -178,6 +191,9 @@ class Runner:
                 self.olist = []
 
     def parse_heading(self, string):
+        """Calculates heading level by the ammount of '#' characters. Formats it with with heading tags.
+        The rest of string (without # symbols) is processed as a regular line by the parseline function.
+        """
         level = 0
         i = "#"
         id = None
@@ -199,6 +215,10 @@ class Runner:
         return con.heading(str(level), string, id)
 
     def run(self):
+        """Main part of the file processing. Reads the file line by line, determines whether it's a heading, (un)ordered list, codeblock, etc.
+        Each line is processed by the parseline funcion (without any leading characters, eg. '* ' for unordered lists) to convert 
+        any in-line formatting, except for codeblocks which are not formatted.
+        """
         self.output = ""
         paragraph = ""
         codeblock = ""
@@ -212,6 +232,7 @@ class Runner:
         self.olist1 = []
         self.olist2 = []
         self.olist3 = []
+        bad_indent = False
         with open(self.filename, mode='r', encoding="utf-8") as file:
             for i in file:
                 i = i.rstrip("\r\n")  # strips only LF, CR or CRLF
@@ -306,7 +327,18 @@ class Runner:
                 elif i[-1] == " ":
                     paragraph += self.parseline(i.rstrip()) + "<br>" + "\n"
                 else:
-                    paragraph += self.parseline(i) + "\n"
+                    if self.olist != [] or self.ulist != []:
+                        if not bad_indent:
+                            print("V textu byla nalezena chybná indentace seznamů. Zkontrolujte prosím vstupní soubor a "
+                                  + "nastavení indentace v konfiguračním souboru.")
+                            bad_indent = True
+                        lists = [self.olist3, self.ulist3, self.olist2, self.ulist2, self.olist1, self.ulist1, self.olist, self.ulist]
+                        for j in lists:
+                            if j != []:
+                                j[-1] += "<br>\n" + self.parseline(i)
+                                break
+                    else:
+                        paragraph += self.parseline(i) + "\n"
 
             self.lists(-1)  # process any lists that weren't processed yet
             if paragraph != "":
