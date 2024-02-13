@@ -10,9 +10,6 @@ class Runner:
         self.outputfilename = outputfilename
         self.syntax_inline = ["*", "*", "_", "_", "~", "`", "=", "^"]
         self.indent = indent
-        self.indent1 = self.indent*" "
-        self.indent2 = 2*self.indent*" "
-        self.indent3 = 3*self.indent*" "
 
     def make_file(self):
         """Creates a basic head element with language, encoding and title settings.
@@ -34,7 +31,7 @@ class Runner:
             f.write(data + "\n</body>" + "\n</html>")
 
     def send_to_edit(self, syntax, string):
-        """Receives a string to be formatted by html tags. Depending on the operator character, the string is 
+        """Receives a string to be formatted by html tags. Depending on the operator character, the string is
         passed to the respective funcion from the html_converter module.
         """
         if syntax == "**" or syntax == "__":
@@ -135,60 +132,30 @@ class Runner:
 
     def lists(self, level):
         """Finds any unfinished indented lists and appends them to the correct previous list. "level" variable indicates which
-        lists level is to be kept unfinished. -1 finishes all lists and appends them to output. 
+        lists level is to be kept unfinished. -1 finishes all lists and appends them to output.
         """
-        if level <= 2:
-            if self.ulist3 != []:
-                temp = con.ul(self.ulist3)
-                if self.ulist2 != []:
-                    self.ulist2[-1] += "\n" + temp
-                elif self.olist2 != []:
-                    self.olist2[-1] += temp
-                self.ulist3 = []
-            elif self.olist3 != []:
-                temp = con.ol(self.olist3)
-                if self.ulist2 != []:
-                    self.ulist2[-1] += "\n" + temp
-                elif self.olist2 != []:
-                    self.olist2[-1] += "\n" + temp
-                self.olist3 = []
-        if level <= 1:
-            if self.ulist2 != []:
-                temp = con.ul(self.ulist2)
-                if self.ulist1 != []:
-                    self.ulist1[-1] += "\n" + temp
-                elif self.olist1 != []:
-                    self.olist1[-1] += temp
-                self.ulist2 = []
-            elif self.olist2 != []:
-                temp = con.ol(self.olist2)
-                if self.ulist1 != []:
-                    self.ulist1[-1] += "\n" + temp
-                elif self.olist1 != []:
-                    self.olist1[-1] += "\n" + temp
-                self.olist2 = []
-        if level <= 0:
-            if self.ulist1 != []:
-                temp = con.ul(self.ulist1)
-                if self.ulist != []:
-                    self.ulist[-1] += "\n" + temp
-                elif self.olist != []:
-                    self.olist[-1] += temp
-                self.ulist1 = []
-            elif self.olist1 != []:
-                temp = con.ol(self.olist1)
-                if self.ulist != []:
-                    self.ulist[-1] += "\n" + temp
-                elif self.olist != []:
-                    self.olist[-1] += "\n" + temp
-                self.olist1 = []
-        if level <= -1:
+        for i in range(3, level, -1):
+            if level == -1 and i == 0: break
+            olists = [self.olist, self.olist1, self.olist2, self.olist3]
+            ulists = [self.ulist, self.ulist1, self.ulist2, self.ulist3]
+            if olists[i] != [] or ulists[i] != []:
+                if olists[i] != []:
+                    temp = con.ol(olists[i])
+                    olists[i][:] = []
+                else:
+                    temp = con.ul(ulists[i])
+                    ulists[i][:] = []
+                if ulists[i-1] != []:
+                    ulists[i-1][-1] += "\n" + temp
+                elif olists[i-1] != []:
+                    olists[i-1][-1] +=  temp
+        if level == -1:
             if self.ulist != []:
                 self.output += con.ul(self.ulist) + "\n"
-                self.ulist = []
+                self.ulist[:] = []
             elif self.olist != []:
                 self.output += con.ol(self.olist) + "\n"
-                self.olist = []
+                self.olist[:] = []
 
     def parse_heading(self, string):
         """Calculates heading level by the ammount of '#' characters. Formats it with with heading tags.
@@ -216,7 +183,7 @@ class Runner:
 
     def run(self):
         """Main part of the file processing. Reads the file line by line, determines whether it's a heading, (un)ordered list, codeblock, etc.
-        Each line is processed by the parseline funcion (without any leading characters, eg. '* ' for unordered lists) to convert 
+        Each line is processed by the parseline funcion (without any leading characters, eg. '* ' for unordered lists) to convert
         any in-line formatting, except for codeblocks which are not formatted.
         """
         self.output = ""
@@ -233,9 +200,13 @@ class Runner:
         self.olist2 = []
         self.olist3 = []
         bad_indent = False
+        olists = [self.olist, self.olist1, self.olist2, self.olist3]
+        ulists = [self.ulist, self.ulist1, self.ulist2, self.ulist3]
         with open(self.filename, mode='r', encoding="utf-8") as file:
             for i in file:
                 i = i.rstrip("\r\n")  # strips only LF, CR or CRLF
+                ol = False
+                ul = False
                 if i == "":
                     self.lists(-1)
                     if paragraph != "":
@@ -281,64 +252,40 @@ class Runner:
                         imglink = re.search(r"[(].*[)]", i)
                         imglink = imglink[0][1:-1]
                         self.output += con.img(imgname, imglink) + "\n"
-
-                elif i[:2] == "* " or i[:2] == "- " or i[:2] == "+ ":
-                    # unordered (bullet-point) list at "zero" depth (no indentation)
-                    self.lists(0)
-                    temp = self.parseline(i[2:])
-                    self.ulist.append(temp)
-
-                elif (i[:self.indent+2] == self.indent1 + "* " or i[:self.indent+2]
-                      == self.indent1 + "+ " or i[:self.indent+2] == self.indent1 + "- "):
-                    # 1st depth
-                    self.lists(1)
-                    temp = self.parseline(i[self.indent+2:])
-                    self.ulist1.append(temp)
-
-                elif (i[:self.indent*2+2] == self.indent2 + "* " or i[:self.indent*2+2]
-                      == self.indent2 + "+ " or i[:self.indent*2+2] == self.indent2 + "- "):
-                    # 2nd depth
-                    self.lists(2)
-                    temp = self.parseline(i[2*self.indent+2:])
-                    self.ulist2.append(temp)
-
-                elif (i[:self.indent*3+2] == self.indent3 + "* " or i[:self.indent*3+2]
-                      == self.indent3 + "+ " or i[:self.indent*3+2] == self.indent3 + "- "):
-                    # 3rd depth
-                    temp = self.parseline(i[3*self.indent+2:])
-                    self.ulist3.append(temp)
-
-                elif i[0].isdigit() and i[1:3] == ". ":
-                    # ordered list at "zero" depth (no indentation)
-                    self.lists(0)
-                    temp = self.parseline(i[3:])
-                    self.olist.append(temp)
-                elif len(i) >= self.indent and i[self.indent].isdigit() and i[self.indent+1:self.indent+3] == ". ":
-                    self.lists(1)
-                    temp = self.parseline(i[self.indent+3:])
-                    self.olist1.append(temp)
-                elif len(i) >= self.indent*2 and i[self.indent*2].isdigit() and i[self.indent*2+1:self.indent*2+3] == ". ":
-                    self.lists(2)
-                    temp = self.parseline(i[self.indent*2+3:])
-                    self.olist2.append(temp)
-                elif len(i) >= self.indent*3 and i[self.indent*3].isdigit() and i[self.indent*3+1:self.indent*3+3] == ". ":
-                    temp = self.parseline(i[self.indent*3+3:])
-                    self.olist3.append(temp)
+                elif i.lstrip()[0] == "*" or i.lstrip()[0] == "-" or i.lstrip()[0] == "+":
+                    for j in range(4):
+                        if i[self.indent*j:self.indent*j+2] == "* " or i[self.indent*j:self.indent*j+2] == "- " or i[self.indent*j:self.indent*j+2] == "+ ":
+                            ul = True
+                            if j < 3:
+                                self.lists(j)
+                            temp = self.parseline(i[self.indent*j+2:])
+                            ulists[j].append(temp)
+                            break
+                elif i.strip()[0].isdigit():
+                    for j in range(4):
+                        if len(i) >= self.indent and i[self.indent*j].isdigit() and i[self.indent*j+1:self.indent*j+3] == ". ":
+                            ol = True
+                            if j < 3:
+                                self.lists(j)
+                            temp = self.parseline(i[self.indent*j+3:])
+                            olists[j].append(temp)
+                            break
                 elif i[-1] == " ":
                     paragraph += self.parseline(i.rstrip()) + "<br>" + "\n"
                 else:
-                    if self.olist != [] or self.ulist != []:
-                        if not bad_indent:
-                            print("V textu byla nalezena chybná indentace seznamů. Zkontrolujte prosím vstupní soubor a "
-                                  + "nastavení indentace v konfiguračním souboru.")
-                            bad_indent = True
-                        lists = [self.olist3, self.ulist3, self.olist2, self.ulist2, self.olist1, self.ulist1, self.olist, self.ulist]
-                        for j in lists:
-                            if j != []:
-                                j[-1] += "<br>\n" + self.parseline(i)
-                                break
-                    else:
-                        paragraph += self.parseline(i) + "\n"
+                    paragraph += self.parseline(i) + "\n"
+                if (self.olist != [] or self.ulist != []) and not ol and not ul:
+                    if not bad_indent:
+                        print("V textu byla nalezena chybná indentace seznamů. Zkontrolujte prosím vstupní soubor a "
+                            + "nastavení indentace v konfiguračním souboru.")
+                        bad_indent = True
+                    lists = [self.olist3, self.ulist3, self.olist2, self.ulist2, self.olist1, self.ulist1, self.olist, self.ulist]
+                    for j in lists:
+                        if j != []:
+                            j[-1] += "<br>\n" + self.parseline(i)
+                            break
+                elif not ol and not ul and i != "" and (i.lstrip()[0] == "*" or i.lstrip()[0].isdigit()):
+                    paragraph += self.parseline(i) + "\n"
 
             self.lists(-1)  # process any lists that weren't processed yet
             if paragraph != "":
