@@ -270,10 +270,12 @@ class Runner:
                             temp = self.parseline(i[self.indent*j+3:])
                             olists[j].append(temp)
                             break
-                elif i[-1] == " ":
-                    paragraph += self.parseline(i.rstrip()) + "<br>" + "\n"
                 else:
-                    paragraph += self.parseline(i) + "\n"
+                    if self.ulist == [] and self.olist == []:
+                        if i[-1] == " ":
+                            paragraph += self.parseline(i.rstrip()) + "<br>" + "\n"
+                        else:
+                            paragraph += self.parseline(i) + "\n"
                 if (self.olist != [] or self.ulist != []) and not ol and not ul:
                     if not bad_indent:
                         print("V textu byla nalezena chybná indentace seznamů. Zkontrolujte prosím vstupní soubor a "
